@@ -3,183 +3,61 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Valentine Flute Spark — Stable Eb Major Line</title>
+  <title>Valentine Flute Spark — Final Fixed</title>
 
   <script src="https://unpkg.com/vexflow@4.2.3/build/cjs/vexflow.js"></script>
   <script src="https://unpkg.com/tone@14.8.49/build/Tone.js"></script>
 
   <style>
     :root{
-      --bg1:#fff5f8;
-      --bg2:#ffe3ee;
-      --card:#ffffffcc;
-      --ink:#2a1b22;
-      --muted:#6a4a58;
-      --accent:#ff3b7a;
-      --accent2:#ff7aa8;
-      --shadow: 0 18px 50px rgba(30, 10, 20, .12);
+      --bg1:#fff5f8; --bg2:#ffe3ee; --card:#ffffffcc;
+      --ink:#2a1b22; --muted:#6a4a58; --accent:#ff3b7a;
+      --accent2:#ff7aa8; --shadow: 0 18px 50px rgba(30, 10, 20, .12);
       --radius: 22px;
     }
     *{box-sizing:border-box}
     body{
-      margin:0;
-      min-height:100vh;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      margin:0; min-height:100vh;
+      font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
       color:var(--ink);
-      background:
-        radial-gradient(1200px 800px at 20% 10%, var(--bg2), transparent 60%),
-        radial-gradient(900px 700px at 80% 20%, #fff, transparent 55%),
-        radial-gradient(1000px 700px at 50% 95%, #ffd3e4, transparent 60%),
-        linear-gradient(180deg, var(--bg1), #fff);
+      background: radial-gradient(1200px 800px at 20% 10%, var(--bg2), transparent 60%), linear-gradient(180deg, var(--bg1), #fff);
       overflow-x:hidden;
     }
-
     .hearts{ position:fixed; inset:0; pointer-events:none; z-index:0; opacity:.55; overflow:hidden; }
     .heart{
-      position:absolute;
-      width:16px; height:16px;
-      transform: rotate(45deg);
+      position:absolute; width:16px; height:16px; transform: rotate(45deg);
       background: linear-gradient(180deg, var(--accent2), var(--accent));
-      border-radius: 3px;
-      filter: drop-shadow(0 6px 8px rgba(255,59,122,.18));
-      animation: floatUp linear infinite;
+      border-radius: 3px; animation: floatUp linear infinite;
     }
-    .heart::before, .heart::after{
-      content:"";
-      position:absolute;
-      width:16px; height:16px;
-      background: inherit;
-      border-radius: 50%;
-    }
-    .heart::before{ left:-8px; top:0; }
-    .heart::after{ left:0; top:-8px; }
-    @keyframes floatUp{
-      from{ transform: translateY(120vh) rotate(45deg); opacity:0; }
-      15%{opacity:1;}
-      to{ transform: translateY(-20vh) rotate(45deg); opacity:0; }
-    }
+    .heart::before, .heart::after{ content:""; position:absolute; width:16px; height:16px; background: inherit; border-radius: 50%; }
+    .heart::before{ left:-8px; top:0; } .heart::after{ left:0; top:-8px; }
+    @keyframes floatUp{ from{ transform: translateY(120vh) rotate(45deg); opacity:0; } 15%{opacity:1;} to{ transform: translateY(-20vh) rotate(45deg); opacity:0; } }
 
-    .wrap{
-      position:relative; z-index:1;
-      max-width: 980px;
-      margin: 0 auto;
-      padding: 44px 18px 54px;
-    }
-
-    header{ display:flex; align-items:flex-start; justify-content:space-between; gap:16px; margin-bottom:18px; }
-    .title{ flex:1; }
-    h1{ margin:0 0 8px 0; font-size: clamp(26px, 4vw, 40px); letter-spacing: -0.02em; line-height:1.05; }
-    .subtitle{ margin:0; color:var(--muted); font-size: 15px; line-height:1.45; max-width: 62ch; }
-
-    .card{
-      background: var(--card);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255,255,255,.7);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      overflow:hidden;
-    }
-
-    .topbar{
-      display:flex;
-      flex-wrap:wrap;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      padding: 14px 16px;
-      border-bottom: 1px solid rgba(50,20,35,.08);
-    }
-
-    .controls{ display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
-
+    .wrap{ position:relative; z-index:1; max-width: 980px; margin: 0 auto; padding: 44px 18px; }
+    h1{ margin:0 0 8px 0; font-size: clamp(26px, 4vw, 40px); }
+    .card{ background: var(--card); backdrop-filter: blur(10px); border: 1px solid #fff; border-radius: var(--radius); box-shadow: var(--shadow); overflow:hidden; }
+    .topbar{ display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px; padding: 16px; border-bottom: 1px solid rgba(0,0,0,0.05); }
+    .controls{ display:flex; gap:10px; }
+    
     button{
-      appearance:none;
-      border:none;
-      padding: 10px 14px;
-      border-radius: 14px;
-      cursor:pointer;
-      font-weight:650;
-      font-size:14px;
-      letter-spacing:.01em;
-      color:white;
-      background: linear-gradient(180deg, var(--accent2), var(--accent));
-      box-shadow: 0 10px 22px rgba(255,59,122,.25);
-      transition: transform .08s ease, box-shadow .2s ease, opacity .2s ease;
+      border:none; padding: 10px 18px; border-radius: 14px; cursor:pointer; font-weight:650;
+      color:white; background: linear-gradient(180deg, var(--accent2), var(--accent));
+      box-shadow: 0 10px 20px rgba(255,59,122,0.2);
     }
-    button:active{ transform: translateY(1px) scale(.99); }
-    button.secondary{
-      color: var(--ink);
-      background: linear-gradient(180deg, #ffffff, #ffe9f2);
-      border: 1px solid rgba(255,59,122,.25);
-      box-shadow: 0 10px 22px rgba(30,10,20,.08);
-    }
-    button:disabled{ opacity:.55; cursor:not-allowed; }
-
-    .pill{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; color: var(--muted); font-size: 13px; }
-    .badge{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      padding: 7px 10px;
-      border-radius: 999px;
-      background: rgba(255,255,255,.75);
-      border: 1px solid rgba(50,20,35,.08);
-    }
-    .dot{
-      width:10px;height:10px;border-radius:999px;
-      background: var(--accent);
-      box-shadow: 0 0 0 4px rgba(255,59,122,.15);
-    }
-
-    .stage{ padding: 16px; }
+    button.secondary{ color: var(--ink); background: #fff; border: 1px solid #ddd; box-shadow: none; }
+    button:disabled{ opacity:.5; cursor: default; }
 
     #notation {
-      width: 100%;
-      min-height: 280px;
-      overflow-x: auto; 
-      overflow-y: hidden;
-      -webkit-overflow-scrolling: touch;
-      padding: 20px;
-      border-radius: 18px;
-      background: rgba(255,255,255,.65);
-      border: 1px solid rgba(50,20,35,.08);
-      scrollbar-width: thin;
-      scrollbar-color: var(--accent2) transparent;
+      width: 100%; min-height: 280px; overflow-x: auto; padding: 20px;
+      background: rgba(255,255,255,0.6); border-radius: 18px; margin: 16px; width: calc(100% - 32px);
     }
-
-    #notation svg { 
-      display: block; 
-      margin: 0 auto;
-    }
-
-    .footer{
-      margin-top: 14px;
-      display:flex;
-      flex-wrap:wrap;
-      gap:10px;
-      align-items:center;
-      justify-content:space-between;
-      color: var(--muted);
-      font-size: 13px;
-      padding: 0 6px;
-    }
-    .small{ opacity:.9; line-height:1.4; }
   </style>
 </head>
 
 <body>
   <div class="hearts" id="hearts"></div>
-
   <div class="wrap">
-    <header>
-      <div class="title">
-        <h1>Valentine Flute Spark 💘</h1>
-        <p class="subtitle">
-          3 bars of E♭ major. No repeats, max jump of a 5th, ending on E♭ half-note.
-        </p>
-      </div>
-    </header>
-
+    <h1>Valentine Flute Spark 💘</h1>
     <div class="card">
       <div class="topbar">
         <div class="controls">
@@ -187,277 +65,133 @@
           <button id="btnPlay" class="secondary">Play ▶︎</button>
           <button id="btnStop" class="secondary" disabled>Stop ■</button>
         </div>
-
-        <div class="pill">
-          <span class="badge"><span class="dot"></span>
-            <span id="meta">E♭ major • 4/4 • ♩=156 • 3 bars • 12 beats</span>
-          </span>
-        </div>
+        <div style="font-size: 13px; font-weight: 600;">E♭ Major • 3 Bars • Ends on Eb Half-Note</div>
       </div>
-
-      <div class="stage">
-        <div id="notation"></div>
-        <div class="footer">
-          <div class="small">Tip: if audio doesn’t start, click <b>Play</b> once more.</div>
-          <div class="small">VexFlow + Tone.js</div>
-        </div>
-      </div>
+      <div id="notation"></div>
     </div>
   </div>
 
 <script>
-/* ----------------------------
-   Floating hearts
------------------------------ */
-(function makeHearts(){
-  const wrap = document.getElementById("hearts");
-  const count = 26;
-  for (let i=0;i<count;i++){
-    const h = document.createElement("div");
-    h.className = "heart";
-    const left = Math.random()*100;
-    const size = 10 + Math.random()*14;
-    const dur  = 8 + Math.random()*10;
-    const delay = -Math.random()*dur;
-    h.style.left = left + "vw";
-    h.style.width = size + "px";
-    h.style.height = size + "px";
-    h.style.animationDuration = dur + "s";
-    h.style.animationDelay = delay + "s";
-    h.style.opacity = (0.25 + Math.random()*0.6).toFixed(2);
-    wrap.appendChild(h);
+// --- Hearts ---
+(function(){
+  const w = document.getElementById("hearts");
+  for(let i=0; i<25; i++){
+    const h = document.createElement("div"); h.className="heart";
+    h.style.left = Math.random()*100+"vw";
+    h.style.animationDuration = (8+Math.random()*10)+"s";
+    h.style.animationDelay = (-Math.random()*10)+"s";
+    w.appendChild(h);
   }
 })();
 
-/* ----------------------------
-   Settings & Logic
------------------------------ */
-const TEMPO = 156;
-const BARS = 3;
-const TIME_SIG = "4/4";
-const SCALE_VEX = ["eb", "f", "g", "ab", "bb", "c", "d"];
-const MIDI_MIN = 60; 
-const MIDI_MAX = 84; 
-const MAX_LEAP_SEMITONES = 7; 
-const TICKS_PER_BAR = 16;
-
+// --- Logic ---
+const SCALE = ["eb/4", "f/4", "g/4", "ab/4", "bb/4", "c/5", "d/5", "eb/5", "f/5", "g/5", "ab/5", "bb/5", "c/6"];
 const RHYTHMS = [
-  { ticks: 1, vf: "16", dots: 0, toneDur: "16n", beats: 0.25 },
-  { ticks: 2, vf: "8",  dots: 0, toneDur: "8n",  beats: 0.50 },
-  { ticks: 4, vf: "q",  dots: 0, toneDur: "4n",  beats: 1.00 },
-  { ticks: 6, vf: "q",  dots: 1, toneDur: "4n.", beats: 1.50 }
+  { ticks: 4, vf: "q", dur: "4n", beats: 1 },
+  { ticks: 2, vf: "8", dur: "8n", beats: 0.5 },
+  { ticks: 1, vf: "16", dur: "16n", beats: 0.25 }
 ];
 
-function weightedChoice(items, weights){
-  const total = weights.reduce((a,b)=>a+b,0);
-  let r = Math.random()*total;
-  for (let i=0;i<items.length;i++){
-    r -= weights[i];
-    if (r <= 0) return items[i];
-  }
-  return items[items.length-1];
-}
+let currentPhrase = [];
+let synth = null;
 
-function weightedRhythmPickTicks(remainingTicks){
-  const choices = RHYTHMS.filter(r => r.ticks <= remainingTicks);
-  const weights = choices.map(r => {
-    if (r.ticks === 1) return 5;
-    if (r.ticks === 2) return 4;
-    if (r.ticks === 4) return 2.5;
-    if (r.ticks === 6) return 1.2;
-    return 1;
-  });
-  return weightedChoice(choices, weights);
-}
+function generate() {
+  const phrase = [];
+  let lastNote = "";
 
-function vexKey(pc, oct){ return `${pc}/${oct}`; }
-function vexToToneName(vk){
-  const [pc, oct] = vk.split("/");
-  const letter = pc[0].toUpperCase();
-  const accidental = pc.length > 1 ? "b" : "";
-  return `${letter}${accidental}${oct}`;
-}
-function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
-
-function pickNextNote(prevIdx, prevMidi){
-  const deltas = [{d:-1,w:5}, {d:+1,w:5}, {d:-2,w:3}, {d:+2,w:3}, {d:-3,w:1.2}, {d:+3,w:1.2}];
-  const delta = weightedChoice(deltas, deltas.map(x=>x.w)).d;
-  const idx = (prevIdx + delta + SCALE_VEX.length) % SCALE_VEX.length;
-  const pc = SCALE_VEX[idx];
-  const baseOct = prevMidi ? parseInt(Tone.Frequency(prevMidi, "midi").toNote().replace(/[A-G][b#]?/, ""), 10) : 5;
-  const octChoices = [baseOct, baseOct+1, baseOct-1].map(o=>clamp(o,4,6));
-
-  for (const oct of octChoices){
-    const vk = vexKey(pc, oct);
-    const tn = vexToToneName(vk);
-    const midi = Tone.Frequency(tn).toMidi();
-    // Rule: No repeats and max leap of a 5th (7 semitones)
-    if (midi === prevMidi) continue;
-    if (midi < MIDI_MIN || midi > MIDI_MAX) continue;
-    if (prevMidi != null && Math.abs(midi - prevMidi) > MAX_LEAP_SEMITONES) continue;
-    return { idx, vexKey: vk, tone: tn, midi };
-  }
-  // Fallback to avoid error
-  return { idx: 0, vexKey: "eb/5", tone: "Eb5", midi: 75 };
-}
-
-function generatePhrase(){
-  const measures = [];
-  let prevIdx = Math.floor(Math.random()*SCALE_VEX.length);
-  let prevMidi = Tone.Frequency("Eb5").toMidi();
-
-  for (let m=0; m<BARS; m++){
-    let remaining = TICKS_PER_BAR;
-    const notes = [];
+  for (let b = 0; b < 3; b++) {
+    let rem = 16;
+    const measure = [];
     
-    // Final measure ending logic
-    if (m === BARS - 1) remaining = 8; // Leave room for half note
+    // Last bar reserve 8 ticks for the final half note
+    const limit = (b === 2) ? 8 : 0;
 
-    while (remaining > 0){
-      const r = weightedRhythmPickTicks(remaining);
-      const picked = pickNextNote(prevIdx, prevMidi);
-      notes.push({ vexKey: picked.vexKey, vfDur: r.vf, dots: r.dots, ticks: r.ticks, beats: r.beats, toneDur: r.toneDur, toneName: picked.tone });
-      remaining -= r.ticks;
-      prevIdx = picked.idx;
-      prevMidi = picked.midi;
+    while (rem > limit) {
+      const possible = RHYTHMS.filter(r => r.ticks <= (rem - limit));
+      const r = possible[Math.floor(Math.random() * possible.length)];
+      
+      let note;
+      do {
+        note = SCALE[Math.floor(Math.random() * SCALE.length)];
+      } while (note === lastNote); // No consecutive repeats
+
+      measure.push({ key: note, vfDur: r.vf, toneDur: r.dur, beats: r.beats });
+      rem -= r.ticks;
+      lastNote = note;
     }
 
-    if (m === BARS - 1) {
-       // Always end on Eb half note
-       notes.push({ vexKey: "eb/5", vfDur: "h", dots: 0, ticks: 8, beats: 2.0, toneDur: "2n", toneName: "Eb5" });
+    if (b === 2) {
+      measure.push({ key: "eb/5", vfDur: "h", toneDur: "2n", beats: 2 });
     }
-    measures.push(notes);
+    phrase.push(measure);
   }
-  return measures;
+  return phrase;
 }
 
-/* ----------------------------
-   Robust Rendering
------------------------------ */
-let currentPhrase = null;
-
-function renderPhrase(phrase){
+function render(phrase) {
   const div = document.getElementById("notation");
   div.innerHTML = "";
   const VF = Vex.Flow;
   
-  // Calculate width properly
-  const calculatedWidth = Math.max(div.clientWidth - 40, 800);
-  
   const renderer = new VF.Renderer(div, VF.Renderer.Backends.SVG);
-  renderer.resize(calculatedWidth, 250);
+  renderer.resize(850, 250);
   const context = renderer.getContext();
-  const staveY = 60;
-  const margin = 20;
-  const measureWidth = (calculatedWidth - margin * 2) / BARS;
-
-  const staves = [];
-  for (let i=0; i<BARS; i++){
-    const x = margin + (i * measureWidth);
-    const stave = new VF.Stave(x, staveY, measureWidth);
-    if (i === 0) stave.addClef("treble").addTimeSignature(TIME_SIG).addKeySignature("Eb");
+  
+  let x = 20;
+  phrase.forEach((measure, i) => {
+    const stave = new VF.Stave(x, 50, 260);
+    if (i === 0) stave.addClef("treble").addTimeSignature("4/4").addKeySignature("Eb");
     stave.setContext(context).draw();
-    staves.push(stave);
-  }
 
-  for (let i=0; i<BARS; i++){
-    const vexNotes = phrase[i].map(n => {
-      const sn = new VF.StaveNote({ clef: "treble", keys: [n.vexKey], duration: n.vfDur });
-      if (n.dots === 1) sn.addDotToAll();
-      return sn;
-    });
-    
-    const voice = new VF.Voice({ num_beats: 4, beat_value: 4 }).setStrict(true);
-    voice.addTickables(vexNotes);
-    
-    new VF.Formatter().joinVoices([voice]).formatToStave([voice], staves[i], { padding: 40 });
-    voice.draw(context, staves[i]);
-    
+    const vexNotes = measure.map(n => new VF.StaveNote({ clef: "treble", keys: [n.key], duration: n.vfDur }));
     const beams = VF.Beam.generateBeams(vexNotes);
+    
+    Vex.Flow.Formatter.FormatAndDraw(context, stave, vexNotes);
     beams.forEach(b => b.setContext(context).draw());
-  }
+    x += 260;
+  });
 }
 
-async function generateAndRender(){
-  stopPlayback();
-  
-  // Validation Loop: Keep generating until we have a valid 3-bar phrase
-  let phrase;
-  do {
-    phrase = generatePhrase();
-  } while (phrase.length !== 3 || phrase[0].length === 0);
-
-  currentPhrase = phrase;
-  
-  // Clear and small delay to ensure DOM is ready
-  document.getElementById("notation").innerHTML = "";
-  await new Promise(r => requestAnimationFrame(r));
-  
-  try {
-    renderPhrase(currentPhrase);
-  } catch(e) {
-    console.warn("Render failed, retrying...");
-    generateAndRender(); // Recursive retry if VexFlow throws an error
-  }
+async function handleGen() {
+  stopAudio();
+  currentPhrase = generate();
+  render(currentPhrase);
 }
 
-/* ----------------------------
-   Audio Handling
------------------------------ */
-let synth = null, part = null;
-
-function buildFluteishSynth(){
-  const s = new Tone.Synth({ oscillator: { type: "sine" }, envelope: { attack: 0.01, decay: 0.08, sustain: 0.6, release: 0.1 }});
-  const air = new Tone.NoiseSynth({ noise: { type: "pink" }, envelope: { attack: 0.005, decay: 0.05, sustain: 0, release: 0.06 }});
-  const filter = new Tone.Filter(2000, "lowpass");
-  const reverb = new Tone.Reverb({ decay: 2.6, wet: 0.22 });
-  const gain = new Tone.Gain(0.8);
-  s.connect(filter); air.connect(filter); filter.connect(reverb); reverb.connect(gain); gain.toDestination();
-  return { 
-    noteOn: (freq, time, dur) => { s.triggerAttackRelease(freq, dur, time, 0.85); air.triggerAttackRelease(dur, time, 0.25); },
-    dispose: () => { s.dispose(); air.dispose(); filter.dispose(); reverb.dispose(); gain.dispose(); }
-  };
-}
-
-async function playPhrase(){
+async function playAudio() {
   await Tone.start();
-  Tone.Transport.stop(); Tone.Transport.cancel();
-  Tone.Transport.bpm.value = TEMPO;
-  if (part) part.dispose(); if (synth) synth.dispose();
-  synth = buildFluteishSynth();
-
-  const events = []; let t = 0;
+  stopAudio();
+  
+  synth = new Tone.PolySynth(Tone.Synth, { oscillator: { type: "sine" }, envelope: { attack: 0.1 } }).toDestination();
+  
+  let time = Tone.now() + 0.1;
   currentPhrase.flat().forEach(n => {
-    events.push({ time: t, note: n.toneName, dur: n.toneDur, beats: n.beats });
-    t += n.beats;
+    const freq = n.key.replace('/', '');
+    synth.triggerAttackRelease(freq, n.toneDur, time);
+    time += n.beats * (60 / 156);
   });
 
-  const beatSec = 60 / TEMPO;
-  part = new Tone.Part((time, value) => {
-    synth.noteOn(Tone.Frequency(value.note).toFrequency(), time, value.dur);
-  }, events.map(e => [e.time * beatSec, e])).start(0);
-
-  Tone.Transport.start("+0.1");
-  document.getElementById("btnStop").disabled = false;
   document.getElementById("btnPlay").disabled = true;
-  Tone.Transport.scheduleOnce(() => stopPlayback(), (BARS * 4) * beatSec + 0.1);
+  document.getElementById("btnStop").disabled = false;
+  
+  Tone.Transport.scheduleOnce(() => stopAudio(), time);
 }
 
-function stopPlayback(){
-  try { Tone.Transport.stop(); Tone.Transport.cancel(); } catch(e){}
-  if (part) part.dispose(); if (synth) synth.dispose();
-  document.getElementById("btnStop").disabled = true;
+function stopAudio() {
+  if (synth) {
+    synth.releaseAll();
+    synth.dispose();
+    synth = null;
+  }
   document.getElementById("btnPlay").disabled = false;
+  document.getElementById("btnStop").disabled = true;
 }
 
-/* ----------------------------
-   Events
------------------------------ */
-document.getElementById("btnGen").addEventListener("click", generateAndRender);
-document.getElementById("btnPlay").addEventListener("click", playPhrase);
-document.getElementById("btnStop").addEventListener("click", stopPlayback);
-window.addEventListener('resize', () => currentPhrase && renderPhrase(currentPhrase));
-window.addEventListener("load", generateAndRender);
+document.getElementById("btnGen").onclick = handleGen;
+document.getElementById("btnPlay").onclick = playAudio;
+document.getElementById("btnStop").onclick = stopAudio;
+
+window.onload = handleGen;
 </script>
 </body>
 </html>
