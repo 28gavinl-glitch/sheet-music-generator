@@ -5,9 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Valentine Flute Spark — Random Eb Major Line</title>
 
-  <!-- VexFlow (notation) -->
   <script src="https://unpkg.com/vexflow@4.2.3/build/cjs/vexflow.js"></script>
-  <!-- Tone.js (audio) -->
   <script src="https://unpkg.com/tone@14.8.49/build/Tone.js"></script>
 
   <style>
@@ -135,20 +133,24 @@
 
     .stage{ padding: 16px; }
 
-    /* ✅ scroll inside notation; ✅ prevent blank/clip */
-    #notation{
-      width:100%;
-      min-height: 260px;
-      overflow-x:auto;
-      overflow-y:hidden;
+    #notation {
+      width: 100%;
+      min-height: 280px;
+      overflow-x: auto; 
+      overflow-y: hidden;
       -webkit-overflow-scrolling: touch;
-      padding: 10px;
+      padding: 20px;
       border-radius: 18px;
       background: rgba(255,255,255,.65);
       border: 1px solid rgba(50,20,35,.08);
+      scrollbar-width: thin;
+      scrollbar-color: var(--accent2) transparent;
     }
-    /* ✅ important: prevents SVG clipping/weird inline layout */
-    #notation svg{ display:block; }
+
+    #notation svg { 
+      display: block; 
+      margin: 0 auto;
+    }
 
     .footer{
       margin-top: 14px;
@@ -189,7 +191,7 @@
 
         <div class="pill">
           <span class="badge"><span class="dot"></span>
-            <span id="meta">E♭ major • 4/4 • ♩=156 • 3 bars • 12 beats • ALWAYS fills</span>
+            <span id="meta">E♭ major • 4/4 • ♩=156 • 3 bars • 12 beats</span>
           </span>
         </div>
       </div>
@@ -197,7 +199,7 @@
       <div class="stage">
         <div id="notation"></div>
         <div class="footer">
-          <div class="small">Tip: if audio doesn’t start, click <b>Play</b> once more (browser gesture rule).</div>
+          <div class="small">Tip: if audio doesn’t start, click <b>Play</b> once more.</div>
           <div class="small">VexFlow + Tone.js</div>
         </div>
       </div>
@@ -229,23 +231,15 @@
 })();
 
 /* ----------------------------
-   Settings
+   Settings & Logic
 ----------------------------- */
 const TEMPO = 156;
-const BARS = 3;                 // ✅ 3 bars
+const BARS = 3;
 const TIME_SIG = "4/4";
-
 const SCALE_VEX = ["eb", "f", "g", "ab", "bb", "c", "d"];
-
-const MIDI_MIN = 60; // C4
-const MIDI_MAX = 84; // C6
-const MAX_LEAP_SEMITONES = 7; // perfect fifth
-
-/* ============================
-   RHYTHM (GUARANTEED 4/4)
-   ticks: 1=16th, 2=8th, 4=quarter, 6=dotted quarter, 8=half
-   16 ticks = 4/4 measure
-============================ */
+const MIDI_MIN = 60; 
+const MIDI_MAX = 84; 
+const MAX_LEAP_SEMITONES = 7; 
 const TICKS_PER_BAR = 16;
 
 const RHYTHMS = [
@@ -290,27 +284,13 @@ function vexToToneName(vk){
 
 function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
 
-function candidateDeltas(){
-  return [
-    {d:-1,w:5}, {d:+1,w:5},
-    {d:-2,w:3}, {d:+2,w:3},
-    {d:0,w:1.5},
-    {d:-3,w:1.2}, {d:+3,w:1.2}
-  ];
-}
-
 function pickNextNote(prevIdx, prevMidi){
-  const deltas = candidateDeltas();
+  const deltas = [{d:-1,w:5}, {d:+1,w:5}, {d:-2,w:3}, {d:+2,w:3}, {d:0,w:1.5}, {d:-3,w:1.2}, {d:+3,w:1.2}];
   const delta = weightedChoice(deltas, deltas.map(x=>x.w)).d;
-
   const idx = (prevIdx + delta + SCALE_VEX.length) % SCALE_VEX.length;
   const pc = SCALE_VEX[idx];
-
-  const prevOctStr = prevMidi
-    ? Tone.Frequency(prevMidi, "midi").toNote().replace(/[A-G][b#]?/, "")
-    : "5";
+  const prevOctStr = prevMidi ? Tone.Frequency(prevMidi, "midi").toNote().replace(/[A-G][b#]?/, "") : "5";
   const baseOct = prevMidi ? parseInt(prevOctStr, 10) : 5;
-
   const octChoices = [baseOct, baseOct+1, baseOct-1, baseOct+2, baseOct-2].map(o=>clamp(o,4,6));
 
   let best = null;
@@ -318,313 +298,143 @@ function pickNextNote(prevIdx, prevMidi){
     const vk = vexKey(pc, oct);
     const tn = vexToToneName(vk);
     const midi = Tone.Frequency(tn).toMidi();
-
     if (midi < MIDI_MIN || midi > MIDI_MAX) continue;
     if (prevMidi != null && Math.abs(midi - prevMidi) > MAX_LEAP_SEMITONES) continue;
-
     best = { idx, vexKey: vk, tone: tn, midi };
     break;
   }
-
-  if (!best){
-    const pc2 = SCALE_VEX[prevIdx];
-    const vk = vexKey(pc2, clamp(baseOct, 4, 6));
-    const tn = vexToToneName(vk);
-    const midi = Tone.Frequency(tn).toMidi();
-    best = { idx: prevIdx, vexKey: vk, tone: tn, midi };
-  }
-
-  return best;
+  return best || { idx: prevIdx, vexKey: vexKey(SCALE_VEX[prevIdx], clamp(baseOct, 4, 6)), tone: vexToToneName(vexKey(SCALE_VEX[prevIdx], clamp(baseOct, 4, 6))), midi: prevMidi };
 }
 
-/* ----------------------------
-   Generate phrase
-   ✅ 3 bars × 16 ticks = 48 ticks = 12 beats EXACTLY
------------------------------ */
 function generatePhrase(){
   const measures = [];
-
   let prevIdx = Math.floor(Math.random()*SCALE_VEX.length);
   let prevMidi = Tone.Frequency("Eb5").toMidi();
 
   for (let m=0; m<BARS; m++){
     let remaining = TICKS_PER_BAR;
     const notes = [];
-
     while (remaining > 0){
       const r = weightedRhythmPickTicks(remaining);
       const picked = pickNextNote(prevIdx, prevMidi);
-
-      notes.push({
-        vexKey: picked.vexKey,
-        vfDur: r.vf,
-        dots: r.dots,
-        ticks: r.ticks,
-        beats: r.beats,
-        toneDur: r.toneDur,
-        toneName: picked.tone
-      });
-
+      notes.push({ vexKey: picked.vexKey, vfDur: r.vf, dots: r.dots, ticks: r.ticks, beats: r.beats, toneDur: r.toneDur, toneName: picked.tone });
       remaining -= r.ticks;
       prevIdx = picked.idx;
       prevMidi = picked.midi;
     }
-
     measures.push(notes);
   }
-
-  // End on Eb (no big jump)
-  const last = measures[BARS-1][measures[BARS-1].length-1];
-  const prev = measures[BARS-1].length >= 2 ? measures[BARS-1][measures[BARS-1].length-2] : null;
-
-  if (prev){
-    const prevMidi2 = Tone.Frequency(prev.toneName).toMidi();
-    const octCandidates = [4,5,6];
-    let best = null;
-    let bestDiff = Infinity;
-    for (const oct of octCandidates){
-      const tn = `Eb${oct}`;
-      const midi = Tone.Frequency(tn).toMidi();
-      if (midi < MIDI_MIN || midi > MIDI_MAX) continue;
-      const diff = Math.abs(midi - prevMidi2);
-      if (diff < bestDiff){
-        bestDiff = diff;
-        best = { tn, oct };
-      }
-    }
-    if (best){
-      last.vexKey = `eb/${best.oct}`;
-      last.toneName = best.tn;
-    }
-  } else {
-    last.vexKey = "eb/5";
-    last.toneName = "Eb5";
-  }
-
   return measures;
 }
 
 /* ----------------------------
-   Render notation (VexFlow)
-   ✅ width scales with densest bar
-   ✅ increased height so nothing clips
+   Robust Rendering
 ----------------------------- */
 let currentPhrase = null;
-
-function computeRenderWidth(div, phrase){
-  const maxNotes = Math.max(...phrase.map(bar => bar.length));
-  const margin = 18;
-
-  const perBarMin = 290;       // a little wider baseline
-  const perNote = 32;          // more spacing for dense 16ths
-  const perBar = Math.max(perBarMin, 140 + maxNotes * perNote);
-
-  const needed = margin*2 + perBar * BARS;
-  const visible = Math.max(640, div.clientWidth - 24);
-  return Math.max(needed, visible);
-}
 
 function renderPhrase(phrase){
   const div = document.getElementById("notation");
   div.innerHTML = "";
-
   const VF = Vex.Flow;
-  const width = computeRenderWidth(div, phrase);
-  const height = 250;          // ✅ more vertical room
+  
+  const totalNotes = phrase.flat().length;
+  const calculatedWidth = Math.max(div.clientWidth - 40, (BARS * 180) + (totalNotes * 25));
+  
   const renderer = new VF.Renderer(div, VF.Renderer.Backends.SVG);
-  renderer.resize(width, height);
+  renderer.resize(calculatedWidth, 250);
   const context = renderer.getContext();
-
-  const staveY = 76;           // ✅ push stave down so top beams don't clip
-  const margin = 18;
-  const totalStaveWidth = width - margin*2;
-  const measureWidth = totalStaveWidth / BARS;
+  const staveY = 60;
+  const margin = 20;
+  const measureWidth = (calculatedWidth - margin * 2) / BARS;
 
   const staves = [];
-  for (let i=0;i<BARS;i++){
-    const x = margin + i*measureWidth;
+  for (let i=0; i<BARS; i++){
+    const x = margin + (i * measureWidth);
     const stave = new VF.Stave(x, staveY, measureWidth);
-    if (i === 0){
-      stave.addClef("treble").addTimeSignature(TIME_SIG).addKeySignature("Eb");
-    }
+    if (i === 0) stave.addClef("treble").addTimeSignature(TIME_SIG).addKeySignature("Eb");
     stave.setContext(context).draw();
     staves.push(stave);
   }
 
-  for (let i=0;i<BARS;i++){
+  for (let i=0; i<BARS; i++){
     const vexNotes = phrase[i].map(n => {
-      const sn = new VF.StaveNote({
-        clef: "treble",
-        keys: [n.vexKey],
-        duration: n.vfDur
-      });
+      const sn = new VF.StaveNote({ clef: "treble", keys: [n.vexKey], duration: n.vfDur });
       if (n.dots === 1) sn.addDotToAll();
       return sn;
     });
-
-    const beams = VF.Beam.generateBeams(vexNotes, { beam_rests: false });
-
+    const beams = VF.Beam.generateBeams(vexNotes);
     const voice = new VF.Voice({ num_beats: 4, beat_value: 4 }).setStrict(true);
     voice.addTickables(vexNotes);
-
-    new VF.Formatter()
-      .joinVoices([voice])
-      .formatToStave([voice], staves[i], { padding: 12 });
-
+    new VF.Formatter().joinVoices([voice]).formatToStave([voice], staves[i], { padding: 35 });
     voice.draw(context, staves[i]);
     beams.forEach(b => b.setContext(context).draw());
   }
 }
 
-/* =========================
-   VISUAL RELIABILITY FIX
-========================= */
-function svgLooksDrawn(){
-  const div = document.getElementById("notation");
-  const svg = div.querySelector("svg");
-  if (!svg) return false;
-  return svg.querySelectorAll("path").length > 40;
-}
-
-async function renderPhraseSafely(){
-  const div = document.getElementById("notation");
-
-  let tries = 0;
-  while (div.clientWidth < 300 && tries < 12){
-    await new Promise(r => requestAnimationFrame(r));
-    tries++;
-  }
-
-  if (document.fonts && document.fonts.ready){
-    try {
-      await Promise.race([
-        document.fonts.ready,
-        new Promise(r => setTimeout(r, 250))
-      ]);
-    } catch(e){}
-  }
-
-  for (let i=0; i<12; i++){
-    try { renderPhrase(currentPhrase); } catch(e){}
-    await new Promise(r => requestAnimationFrame(r));
-    if (svgLooksDrawn()) return;
-  }
-
-  // last resort: force extra width and render once
-  div.style.minWidth = "1600px";
+async function generateAndRender(){
+  stopPlayback();
+  currentPhrase = generatePhrase();
   await new Promise(r => requestAnimationFrame(r));
   renderPhrase(currentPhrase);
 }
 
-const ro = new ResizeObserver(() => {
-  if (currentPhrase) renderPhraseSafely();
-});
-ro.observe(document.getElementById("notation"));
-
 /* ----------------------------
-   Audio playback (Tone.js)
+   Audio Handling
 ----------------------------- */
-let synth = null;
-let part = null;
+let synth = null, part = null;
 
 function buildFluteishSynth(){
-  const s = new Tone.Synth({
-    oscillator: { type: "sine" },
-    envelope: { attack: 0.01, decay: 0.08, sustain: 0.6, release: 0.10 }
-  });
-
-  const air = new Tone.NoiseSynth({
-    noise: { type: "pink" },
-    envelope: { attack: 0.005, decay: 0.05, sustain: 0.0, release: 0.06 }
-  });
-
+  const s = new Tone.Synth({ oscillator: { type: "sine" }, envelope: { attack: 0.01, decay: 0.08, sustain: 0.6, release: 0.1 }});
+  const air = new Tone.NoiseSynth({ noise: { type: "pink" }, envelope: { attack: 0.005, decay: 0.05, sustain: 0, release: 0.06 }});
   const filter = new Tone.Filter(2000, "lowpass");
   const reverb = new Tone.Reverb({ decay: 2.6, wet: 0.22 });
-  const gain = new Tone.Gain(0.9);
-
-  s.connect(filter);
-  air.connect(filter);
-
-  filter.connect(reverb);
-  reverb.connect(gain);
-  gain.toDestination();
-
-  return {
-    noteOn: (freq, time, dur) => {
-      s.triggerAttackRelease(freq, dur, time, 0.85);
-      air.triggerAttackRelease(dur, time, 0.25);
-    },
+  const gain = new Tone.Gain(0.8);
+  s.connect(filter); air.connect(filter); filter.connect(reverb); reverb.connect(gain); gain.toDestination();
+  return { 
+    noteOn: (freq, time, dur) => { s.triggerAttackRelease(freq, dur, time, 0.85); air.triggerAttackRelease(dur, time, 0.25); },
     dispose: () => { s.dispose(); air.dispose(); filter.dispose(); reverb.dispose(); gain.dispose(); }
   };
 }
 
-function flattenToEvents(phrase){
-  const events = [];
-  let t = 0; // beats
-  for (const measure of phrase){
-    for (const n of measure){
-      events.push({ timeBeats: t, note: n.toneName, dur: n.toneDur, beats: n.beats });
-      t += n.beats;
-    }
-  }
-  return events;
-}
-
 async function playPhrase(){
   await Tone.start();
-  Tone.Transport.stop();
-  Tone.Transport.cancel();
-
+  Tone.Transport.stop(); Tone.Transport.cancel();
   Tone.Transport.bpm.value = TEMPO;
-
-  if (part){ part.dispose(); part = null; }
-  if (synth){ synth.dispose(); synth = null; }
+  if (part) part.dispose(); if (synth) synth.dispose();
   synth = buildFluteishSynth();
 
-  const events = flattenToEvents(currentPhrase);
-  const beatSeconds = 60 / TEMPO;
+  const events = []; let t = 0;
+  currentPhrase.flat().forEach(n => {
+    events.push({ time: t, note: n.toneName, dur: n.toneDur, beats: n.beats });
+    t += n.beats;
+  });
 
+  const beatSec = 60 / TEMPO;
   part = new Tone.Part((time, value) => {
-    const freq = Tone.Frequency(value.note).toFrequency();
-    synth.noteOn(freq, time, value.dur);
-  }, events.map(e => [e.timeBeats * beatSeconds, e]));
+    synth.noteOn(Tone.Frequency(value.note).toFrequency(), time, value.dur);
+  }, events.map(e => [e.time * beatSec, e])).start(0);
 
-  part.start(0);
-  Tone.Transport.start("+0.02");
-
+  Tone.Transport.start("+0.1");
   document.getElementById("btnStop").disabled = false;
   document.getElementById("btnPlay").disabled = true;
-
-  // ✅ 3 bars * 4 beats = 12 beats
-  const totalSeconds = (BARS * 4) * beatSeconds;
-  Tone.Transport.scheduleOnce(() => stopPlayback(), totalSeconds + 0.08);
+  Tone.Transport.scheduleOnce(() => stopPlayback(), (BARS * 4) * beatSec + 0.1);
 }
 
 function stopPlayback(){
   try { Tone.Transport.stop(); Tone.Transport.cancel(); } catch(e){}
-  if (part){ part.dispose(); part = null; }
-  if (synth){ synth.dispose(); synth = null; }
+  if (part) part.dispose(); if (synth) synth.dispose();
   document.getElementById("btnStop").disabled = true;
   document.getElementById("btnPlay").disabled = false;
 }
 
 /* ----------------------------
-   UI wiring
+   Events
 ----------------------------- */
-async function generateAndRender(){
-  stopPlayback();
-  currentPhrase = generatePhrase();   // ✅ exactly 12 beats total
-  await renderPhraseSafely();         // ✅ always shows
-}
-
 document.getElementById("btnGen").addEventListener("click", generateAndRender);
-document.getElementById("btnPlay").addEventListener("click", () => playPhrase());
+document.getElementById("btnPlay").addEventListener("click", playPhrase);
 document.getElementById("btnStop").addEventListener("click", stopPlayback);
-
-// ✅ run after load + 2 frames so layout is stable
-window.addEventListener("load", () => {
-  requestAnimationFrame(() => requestAnimationFrame(() => generateAndRender()));
-});
+window.addEventListener('resize', () => currentPhrase && renderPhrase(currentPhrase));
+window.addEventListener("load", generateAndRender);
 </script>
 </body>
 </html>
