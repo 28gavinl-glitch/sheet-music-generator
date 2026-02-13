@@ -135,16 +135,20 @@
 
     .stage{ padding: 16px; }
 
-    /* ✅ allow horizontal scroll and prevent “first paint blank” */
+    /* ✅ scroll inside notation; ✅ prevent blank/clip */
     #notation{
       width:100%;
-      min-height: 220px;
+      min-height: 260px;
       overflow-x:auto;
+      overflow-y:hidden;
+      -webkit-overflow-scrolling: touch;
       padding: 10px;
       border-radius: 18px;
       background: rgba(255,255,255,.65);
       border: 1px solid rgba(50,20,35,.08);
     }
+    /* ✅ important: prevents SVG clipping/weird inline layout */
+    #notation svg{ display:block; }
 
     .footer{
       margin-top: 14px;
@@ -185,7 +189,7 @@
 
         <div class="pill">
           <span class="badge"><span class="dot"></span>
-            <span id="meta">E♭ major • 4/4 • ♩=156 • 4 bars • ALWAYS fits • always shows</span>
+            <span id="meta">E♭ major • 4/4 • ♩=156 • 3 bars • 12 beats • ALWAYS fills</span>
           </span>
         </div>
       </div>
@@ -228,7 +232,7 @@
    Settings
 ----------------------------- */
 const TEMPO = 156;
-const BARS = 4;
+const BARS = 3;                 // ✅ 3 bars
 const TIME_SIG = "4/4";
 
 const SCALE_VEX = ["eb", "f", "g", "ab", "bb", "c", "d"];
@@ -238,8 +242,9 @@ const MIDI_MAX = 84; // C6
 const MAX_LEAP_SEMITONES = 7; // perfect fifth
 
 /* ============================
-   RHYTHM FIX (GUARANTEED 4/4)
+   RHYTHM (GUARANTEED 4/4)
    ticks: 1=16th, 2=8th, 4=quarter, 6=dotted quarter, 8=half
+   16 ticks = 4/4 measure
 ============================ */
 const TICKS_PER_BAR = 16;
 
@@ -334,7 +339,7 @@ function pickNextNote(prevIdx, prevMidi){
 
 /* ----------------------------
    Generate phrase
-   ✅ Each bar EXACTLY 16 ticks (4/4)
+   ✅ 3 bars × 16 ticks = 48 ticks = 12 beats EXACTLY
 ----------------------------- */
 function generatePhrase(){
   const measures = [];
@@ -402,6 +407,7 @@ function generatePhrase(){
 /* ----------------------------
    Render notation (VexFlow)
    ✅ width scales with densest bar
+   ✅ increased height so nothing clips
 ----------------------------- */
 let currentPhrase = null;
 
@@ -409,9 +415,9 @@ function computeRenderWidth(div, phrase){
   const maxNotes = Math.max(...phrase.map(bar => bar.length));
   const margin = 18;
 
-  const perBarMin = 250;
-  const perNote = 28;
-  const perBar = Math.max(perBarMin, 120 + maxNotes * perNote);
+  const perBarMin = 290;       // a little wider baseline
+  const perNote = 32;          // more spacing for dense 16ths
+  const perBar = Math.max(perBarMin, 140 + maxNotes * perNote);
 
   const needed = margin*2 + perBar * BARS;
   const visible = Math.max(640, div.clientWidth - 24);
@@ -424,13 +430,12 @@ function renderPhrase(phrase){
 
   const VF = Vex.Flow;
   const width = computeRenderWidth(div, phrase);
-  const height = 210;
-
+  const height = 250;          // ✅ more vertical room
   const renderer = new VF.Renderer(div, VF.Renderer.Backends.SVG);
   renderer.resize(width, height);
   const context = renderer.getContext();
 
-  const staveY = 62;
+  const staveY = 76;           // ✅ push stave down so top beams don't clip
   const margin = 18;
   const totalStaveWidth = width - margin*2;
   const measureWidth = totalStaveWidth / BARS;
@@ -464,7 +469,7 @@ function renderPhrase(phrase){
 
     new VF.Formatter()
       .joinVoices([voice])
-      .formatToStave([voice], staves[i], { padding: 10 });
+      .formatToStave([voice], staves[i], { padding: 12 });
 
     voice.draw(context, staves[i]);
     beams.forEach(b => b.setContext(context).draw());
@@ -473,10 +478,6 @@ function renderPhrase(phrase){
 
 /* =========================
    VISUAL RELIABILITY FIX
-   - wait for layout width
-   - render, verify svg has content
-   - retry a few frames if blank
-   - re-render on resize
 ========================= */
 function svgLooksDrawn(){
   const div = document.getElementById("notation");
@@ -503,17 +504,14 @@ async function renderPhraseSafely(){
     } catch(e){}
   }
 
-  for (let i=0; i<10; i++){
-    try {
-      renderPhrase(currentPhrase);
-    } catch(e){
-      // retry
-    }
+  for (let i=0; i<12; i++){
+    try { renderPhrase(currentPhrase); } catch(e){}
     await new Promise(r => requestAnimationFrame(r));
     if (svgLooksDrawn()) return;
   }
 
-  div.style.minWidth = "1400px";
+  // last resort: force extra width and render once
+  div.style.minWidth = "1600px";
   await new Promise(r => requestAnimationFrame(r));
   renderPhrase(currentPhrase);
 }
@@ -597,6 +595,7 @@ async function playPhrase(){
   document.getElementById("btnStop").disabled = false;
   document.getElementById("btnPlay").disabled = true;
 
+  // ✅ 3 bars * 4 beats = 12 beats
   const totalSeconds = (BARS * 4) * beatSeconds;
   Tone.Transport.scheduleOnce(() => stopPlayback(), totalSeconds + 0.08);
 }
@@ -614,8 +613,8 @@ function stopPlayback(){
 ----------------------------- */
 async function generateAndRender(){
   stopPlayback();
-  currentPhrase = generatePhrase();
-  await renderPhraseSafely();
+  currentPhrase = generatePhrase();   // ✅ exactly 12 beats total
+  await renderPhraseSafely();         // ✅ always shows
 }
 
 document.getElementById("btnGen").addEventListener("click", generateAndRender);
