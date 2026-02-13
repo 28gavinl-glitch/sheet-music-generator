@@ -5,28 +5,19 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Valentine Flute Spark — Random Eb Major Line</title>
 
-  <!-- VexFlow (notation) -->
   <script src="https://unpkg.com/vexflow@4.2.3/build/cjs/vexflow.js"></script>
-  <!-- Tone.js (audio) -->
   <script src="https://unpkg.com/tone@14.8.49/build/Tone.js"></script>
 
   <style>
     :root{
-      --bg1:#fff5f8;
-      --bg2:#ffe3ee;
-      --card:#ffffffcc;
-      --ink:#2a1b22;
-      --muted:#6a4a58;
-      --accent:#ff3b7a;
-      --accent2:#ff7aa8;
-      --shadow: 0 18px 50px rgba(30, 10, 20, .12);
-      --radius: 22px;
+      --bg1:#fff5f8; --bg2:#ffe3ee; --card:#ffffffcc;
+      --ink:#2a1b22; --muted:#6a4a58; --accent:#ff3b7a; --accent2:#ff7aa8;
+      --shadow: 0 18px 50px rgba(30, 10, 20, .12); --radius: 22px;
     }
     *{box-sizing:border-box}
     body{
-      margin:0;
-      min-height:100vh;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      margin:0; min-height:100vh;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
       color:var(--ink);
       background:
         radial-gradient(1200px 800px at 20% 10%, var(--bg2), transparent 60%),
@@ -35,41 +26,20 @@
         linear-gradient(180deg, var(--bg1), #fff);
       overflow-x:hidden;
     }
-
     .hearts{ position:fixed; inset:0; pointer-events:none; z-index:0; opacity:.55; }
     .heart{
-      position:absolute;
-      width:16px; height:16px;
-      transform: rotate(45deg);
+      position:absolute; width:16px; height:16px; transform: rotate(45deg);
       background: linear-gradient(180deg, var(--accent2), var(--accent));
       border-radius: 3px;
       filter: drop-shadow(0 6px 8px rgba(255,59,122,.18));
       animation: floatUp linear infinite;
     }
-    .heart::before, .heart::after{
-      content:"";
-      position:absolute;
-      width:16px; height:16px;
-      background: inherit;
-      border-radius: 50%;
-    }
-    .heart::before{ left:-8px; top:0; }
-    .heart::after{ left:0; top:-8px; }
-    @keyframes floatUp{
-      from{ transform: translateY(120vh) rotate(45deg); opacity:0; }
-      15%{opacity:1;}
-      to{ transform: translateY(-20vh) rotate(45deg); opacity:0; }
-    }
+    .heart::before,.heart::after{ content:""; position:absolute; width:16px; height:16px; background:inherit; border-radius:50%; }
+    .heart::before{ left:-8px; top:0; } .heart::after{ left:0; top:-8px; }
+    @keyframes floatUp{ from{ transform: translateY(120vh) rotate(45deg); opacity:0; } 15%{opacity:1;} to{ transform: translateY(-20vh) rotate(45deg); opacity:0; } }
 
-    .wrap{
-      position:relative; z-index:1;
-      max-width: 980px;
-      margin: 0 auto;
-      padding: 44px 18px 54px;
-    }
-
-    header{ display:flex; align-items:flex-start; justify-content:space-between; gap:16px; margin-bottom:18px; }
-    .title{ flex:1; }
+    .wrap{ position:relative; z-index:1; max-width:980px; margin:0 auto; padding:44px 18px 54px; }
+    header{ margin-bottom:18px; }
     h1{ margin:0 0 8px 0; font-size: clamp(26px, 4vw, 40px); letter-spacing: -0.02em; line-height:1.05; }
     .subtitle{ margin:0; color:var(--muted); font-size: 15px; line-height:1.45; max-width: 70ch; }
 
@@ -81,34 +51,18 @@
       box-shadow: var(--shadow);
       overflow:hidden;
     }
-
     .topbar{
-      display:flex;
-      flex-wrap:wrap;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      padding: 14px 16px;
+      display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between;
+      gap:12px; padding: 14px 16px;
       border-bottom: 1px solid rgba(50,20,35,.08);
     }
-
     .controls{ display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
-
     button{
-      appearance:none;
-      border:none;
-      padding: 10px 14px;
-      border-radius: 14px;
-      cursor:pointer;
-      font-weight:650;
-      font-size:14px;
-      letter-spacing:.01em;
-      color:white;
+      appearance:none; border:none; padding: 10px 14px; border-radius: 14px; cursor:pointer;
+      font-weight:650; font-size:14px; letter-spacing:.01em; color:white;
       background: linear-gradient(180deg, var(--accent2), var(--accent));
       box-shadow: 0 10px 22px rgba(255,59,122,.25);
-      transition: transform .08s ease, box-shadow .2s ease, opacity .2s ease;
     }
-    button:active{ transform: translateY(1px) scale(.99); }
     button.secondary{
       color: var(--ink);
       background: linear-gradient(180deg, #ffffff, #ffe9f2);
@@ -119,19 +73,12 @@
 
     .pill{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; color: var(--muted); font-size: 13px; }
     .badge{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      padding: 7px 10px;
-      border-radius: 999px;
+      display:inline-flex; align-items:center; gap:8px;
+      padding: 7px 10px; border-radius: 999px;
       background: rgba(255,255,255,.75);
       border: 1px solid rgba(50,20,35,.08);
     }
-    .dot{
-      width:10px;height:10px;border-radius:999px;
-      background: var(--accent);
-      box-shadow: 0 0 0 4px rgba(255,59,122,.15);
-    }
+    .dot{ width:10px;height:10px;border-radius:999px; background: var(--accent); box-shadow: 0 0 0 4px rgba(255,59,122,.15); }
 
     .stage{ padding: 16px; }
     #notation{
@@ -144,15 +91,9 @@
     }
 
     .footer{
-      margin-top: 14px;
-      display:flex;
-      flex-wrap:wrap;
-      gap:10px;
-      align-items:center;
-      justify-content:space-between;
-      color: var(--muted);
-      font-size: 13px;
-      padding: 0 6px;
+      margin-top: 14px; display:flex; flex-wrap:wrap; gap:10px;
+      align-items:center; justify-content:space-between;
+      color: var(--muted); font-size: 13px; padding: 0 6px;
     }
     .small{ opacity:.9; line-height:1.4; }
   </style>
@@ -163,14 +104,11 @@
 
   <div class="wrap">
     <header>
-      <div class="title">
-        <h1>Valentine Flute Spark 💘</h1>
-        <p class="subtitle">
-          Random one-line, fast-tempo flute passage in <b>E♭ major</b>.
-          Click <b>Generate</b> for a new line and <b>Play</b> to hear it.
-          <br><span style="color:var(--muted)">Rules: always fits <b>4/4</b>, <b>3 bars</b>, leaps ≤ <b>perfect fifth</b>.</span>
-        </p>
-      </div>
+      <h1>Valentine Flute Spark 💘</h1>
+      <p class="subtitle">
+        Random fast flute passage in <b>E♭ major</b>. <b>3 bars</b>, always fits <b>4/4</b>.
+        Only rule: leaps ≤ <b>perfect fifth</b>.
+      </p>
     </header>
 
     <div class="card">
@@ -189,7 +127,7 @@
       <div class="stage">
         <div id="notation"></div>
         <div class="footer">
-          <div class="small">Tip: if audio doesn’t start, click <b>Play</b> once more (browser gesture rule).</div>
+          <div class="small">If audio doesn’t start, click <b>Play</b> once more (browser gesture rule).</div>
           <div class="small">VexFlow + Tone.js</div>
         </div>
       </div>
@@ -197,9 +135,7 @@
   </div>
 
 <script>
-/* ----------------------------
-   Floating hearts
------------------------------ */
+/* hearts */
 (function makeHearts(){
   const wrap = document.getElementById("hearts");
   const count = 26;
@@ -220,35 +156,28 @@
   }
 })();
 
-/* ----------------------------
-   Settings
------------------------------ */
+/* settings */
 const TEMPO = 156;
-const BARS = 3;                 // ✅ per your request
+const BARS = 3;
 const TIME_SIG = "4/4";
-
-// Eb major: Eb F G Ab Bb C D (diatonic)
 const SCALE_VEX = ["eb", "f", "g", "ab", "bb", "c", "d"];
-
-// Flute-ish range boundaries
 const MIDI_MIN = 60; // C4
 const MIDI_MAX = 84; // C6
-
-// ✅ Only rule: leaps no bigger than a FIFTH (<= 7 semitones)
 const MAX_LEAP_SEMITONES = 7;
 
-// Rhythm atoms: ONLY choose durations that can EXACTLY fill 4 beats
-// (quarter, eighth, sixteenth, half, dotted quarter, dotted eighth)
-const RHYTHMS = [
-  { beats: 0.25, vf: "16", toneDur: "16n" },
-  { beats: 0.50, vf: "8",  toneDur: "8n"  },
-  { beats: 0.75, vf: "8d", toneDur: "8n." },  // dotted eighth
-  { beats: 1.00, vf: "q",  toneDur: "4n"  },
-  { beats: 1.50, vf: "qd", toneDur: "4n." },  // dotted quarter
-  { beats: 2.00, vf: "h",  toneDur: "2n"  }
+/* ======= rhythm in integer ticks (16 ticks per bar) ======= */
+const BAR_TICKS = 16; // 4/4 = 16 sixteenth-notes
+
+// tick values: 1=16th,2=8th,3=dotted8th,4=quarter,6=dottedQ,8=half
+const RHY_TOKENS = [
+  { ticks: 1, vf: "16", dots: 0, toneDur: "16n" },
+  { ticks: 2, vf: "8",  dots: 0, toneDur: "8n"  },
+  { ticks: 3, vf: "8",  dots: 1, toneDur: "8n." },
+  { ticks: 4, vf: "q",  dots: 0, toneDur: "4n"  },
+  { ticks: 6, vf: "q",  dots: 1, toneDur: "4n." },
+  { ticks: 8, vf: "h",  dots: 0, toneDur: "2n"  },
 ];
 
-// Weighted pick (favor faster motion a bit)
 function weightedChoice(items, weights){
   const total = weights.reduce((a,b)=>a+b,0);
   let r = Math.random()*total;
@@ -259,62 +188,46 @@ function weightedChoice(items, weights){
   return items[items.length-1];
 }
 
-function pickRhythmThatFits(remaining){
-  const choices = RHYTHMS.filter(r => r.beats <= remaining + 1e-9);
-
-  // IMPORTANT: prevent getting stuck with impossible leftover (like 0.10 etc)
-  // Since our beats are multiples of 0.25, remaining will always be multiple of 0.25
-  // as long as we subtract only these values. So it will ALWAYS finish exactly.
-
-  const weights = choices.map(r => {
-    if (r.beats === 0.25) return 4.8;
-    if (r.beats === 0.50) return 4.0;
-    if (r.beats === 0.75) return 2.6;
-    if (r.beats === 1.00) return 2.0;
-    if (r.beats === 1.50) return 1.3;
-    if (r.beats === 2.00) return 0.9;
+function pickRhythmToken(remainingTicks){
+  const choices = RHY_TOKENS.filter(t => t.ticks <= remainingTicks);
+  const weights = choices.map(t => {
+    if (t.ticks === 1) return 4.8;
+    if (t.ticks === 2) return 4.0;
+    if (t.ticks === 3) return 2.6;
+    if (t.ticks === 4) return 2.0;
+    if (t.ticks === 6) return 1.3;
+    if (t.ticks === 8) return 0.9;
     return 1;
   });
   return weightedChoice(choices, weights);
 }
 
+/* ======= pitch helpers ======= */
 function vexKey(pc, oct){ return `${pc}/${oct}`; }
-
-function vexToToneName(vexKey){
-  // "eb/5" -> "Eb5"
-  const [pc, oct] = vexKey.split("/");
+function vexToToneName(vk){
+  const [pc, oct] = vk.split("/");
   const letter = pc[0].toUpperCase();
   const accidental = pc.length > 1 ? "b" : "";
   return `${letter}${accidental}${oct}`;
 }
-
 function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
 
-/* ----------------------------
-   Melody generation:
-   - diatonic Eb major
-   - enforce leap <= perfect fifth (<= 7 semitones)
-   - allow repeats (since you removed that restriction), but still mostly stepwise
------------------------------ */
 function candidateDeltas(){
-  // scale-step deltas (allow up to 4 steps ~ a fifth-ish diatonically)
   return [
     {d:-1,w:5.0},{d:+1,w:5.0},
     {d:-2,w:3.2},{d:+2,w:3.2},
     {d:-3,w:1.8},{d:+3,w:1.8},
     {d:-4,w:1.0},{d:+4,w:1.0},
-    {d:0,w:1.4} // allow occasional repeat
+    {d:0,w:1.4}
   ];
 }
 
 function pickNextNote(prevIdx, prevMidi){
-  // Generate a short list of valid candidates (fast, no infinite loops)
   const deltas = candidateDeltas();
   const baseOct = prevMidi ? parseInt(Tone.Frequency(prevMidi, "midi").toNote().replace(/[A-G][b#]?/, ""), 10) : 5;
   const octChoices = [baseOct, baseOct+1, baseOct-1, baseOct+2, baseOct-2].map(o=>clamp(o,4,6));
 
   const candidates = [];
-
   for (const dd of deltas){
     const idx = (prevIdx + dd.d + SCALE_VEX.length) % SCALE_VEX.length;
     const pc = SCALE_VEX[idx];
@@ -324,19 +237,14 @@ function pickNextNote(prevIdx, prevMidi){
       const tn = vexToToneName(vk);
       const midi = Tone.Frequency(tn).toMidi();
       if (midi < MIDI_MIN || midi > MIDI_MAX) continue;
-
-      if (prevMidi != null){
-        const diff = Math.abs(midi - prevMidi);
-        if (diff > MAX_LEAP_SEMITONES) continue;
-      }
+      if (prevMidi != null && Math.abs(midi - prevMidi) > MAX_LEAP_SEMITONES) continue;
 
       candidates.push({ idx, vexKey: vk, tone: tn, midi, w: dd.w });
-      break; // closest octave that works for this scale step
+      break;
     }
   }
 
   if (!candidates.length){
-    // last-resort: stay on same pitch class, clamp octave
     const pc = SCALE_VEX[prevIdx];
     const vk = vexKey(pc, baseOct);
     const tn = vexToToneName(vk);
@@ -347,32 +255,31 @@ function pickNextNote(prevIdx, prevMidi){
   return weightedChoice(candidates, candidates.map(c=>c.w));
 }
 
+/* ======= generate phrase (EXACT 4/4 every bar) ======= */
 function generatePhrase(){
   const measures = [];
   let prevIdx = Math.floor(Math.random()*SCALE_VEX.length);
   let prevMidi = Tone.Frequency("Eb5").toMidi();
 
   for (let m=0; m<BARS; m++){
-    let remaining = 4.0; // ✅ EXACTLY 4/4 per bar
+    let remaining = BAR_TICKS; // integer ticks
     const notes = [];
 
-    // We will always finish because all rhythm values are multiples of 0.25
-    while (remaining > 1e-9){
-      const r = pickRhythmThatFits(remaining);
+    while (remaining > 0){
+      const tok = pickRhythmToken(remaining);
       const picked = pickNextNote(prevIdx, prevMidi);
 
       notes.push({
         vexKey: picked.vexKey,
-        vfDur: r.vf,
-        beats: r.beats,
-        toneDur: r.toneDur,
+        vfDur: tok.vf,
+        dots: tok.dots,
+        ticks: tok.ticks,
+        beats: tok.ticks / 4,       // 4 ticks per beat
+        toneDur: tok.toneDur,
         toneName: picked.tone
       });
 
-      remaining -= r.beats;
-      // snap small float errors
-      remaining = Math.round(remaining * 1000) / 1000;
-
+      remaining -= tok.ticks;
       prevIdx = picked.idx;
       prevMidi = picked.midi;
     }
@@ -380,49 +287,35 @@ function generatePhrase(){
     measures.push(notes);
   }
 
-  // Optional: end on tonic (Eb) while respecting the fifth rule
-  const lastMeasure = measures[BARS-1];
-  const last = lastMeasure[lastMeasure.length-1];
-  const prev = lastMeasure.length >= 2 ? lastMeasure[lastMeasure.length-2] : null;
-
-  if (prev){
+  // optional: end on Eb if possible within a 5th
+  const lastBar = measures[BARS-1];
+  if (lastBar.length >= 2){
+    const prev = lastBar[lastBar.length-2];
     const prevMidi2 = Tone.Frequency(prev.toneName).toMidi();
-    const octCandidates = [4,5,6];
-    let best = null;
-    let bestDiff = Infinity;
-    for (const oct of octCandidates){
-      const tn = `Eb${oct}`;
-      const midi = Tone.Frequency(tn).toMidi();
-      if (midi < MIDI_MIN || midi > MIDI_MAX) continue;
-      const diff = Math.abs(midi - prevMidi2);
-      if (diff <= MAX_LEAP_SEMITONES && diff < bestDiff){
-        bestDiff = diff;
-        best = { tn, oct };
-      }
-    }
-    if (best){
-      last.vexKey = `eb/${best.oct}`;
+    const candidates = [4,5,6].map(o => ({
+      tn:`Eb${o}`, vk:`eb/${o}`, midi: Tone.Frequency(`Eb${o}`).toMidi()
+    })).filter(c => c.midi>=MIDI_MIN && c.midi<=MIDI_MAX && Math.abs(c.midi-prevMidi2)<=MAX_LEAP_SEMITONES);
+
+    if (candidates.length){
+      candidates.sort((a,b)=>Math.abs(a.midi-prevMidi2)-Math.abs(b.midi-prevMidi2));
+      const best = candidates[0];
+      const last = lastBar[lastBar.length-1];
       last.toneName = best.tn;
+      last.vexKey = best.vk;
     }
   }
 
   return measures;
 }
 
-/* ----------------------------
-   Render notation (VexFlow)
-   - Even spacing: formatToStave per bar
-   - Correct dots by addDotToAll() (prevents weird overlapping)
-   - Key signature handles flats (no manual accidentals)
------------------------------ */
+/* ======= render (no blank SVG; strict voice always valid now) ======= */
 let currentPhrase = null;
 
 function computeWidth(div, phrase){
-  // Wider if many notes, to avoid collisions (16ths-heavy bars)
   const base = Math.max(720, div.clientWidth - 24);
   const maxNotes = Math.max(...phrase.map(bar => bar.length));
-  const extra = Math.max(0, maxNotes - 10) * 22; // add width beyond 10 notes/bar
-  return Math.min(1400, base + extra);
+  const extra = Math.max(0, maxNotes - 12) * 22;
+  return Math.min(1500, base + extra);
 }
 
 function renderPhrase(phrase){
@@ -431,13 +324,13 @@ function renderPhrase(phrase){
 
   const VF = Vex.Flow;
   const width = computeWidth(div, phrase);
-  const height = 220;
+  const height = 230;
 
   const renderer = new VF.Renderer(div, VF.Renderer.Backends.SVG);
   renderer.resize(width, height);
   const context = renderer.getContext();
 
-  const staveY = 62;
+  const staveY = 64;
   const margin = 18;
   const totalStaveWidth = width - margin*2;
   const measureWidth = totalStaveWidth / BARS;
@@ -457,10 +350,12 @@ function renderPhrase(phrase){
     const bar = phrase[i];
 
     const vexNotes = bar.map(n => {
-      // Duration mapping: VexFlow expects "8" not "8d" if we use addDotToAll
-      const dur = (n.vfDur === "8d") ? "8" : (n.vfDur === "qd" ? "q" : n.vfDur);
-      const sn = new VF.StaveNote({ clef:"treble", keys:[n.vexKey], duration: dur });
-      if (n.vfDur === "8d" || n.vfDur === "qd") sn.addDotToAll();
+      const sn = new VF.StaveNote({
+        clef:"treble",
+        keys:[n.vexKey],
+        duration:n.vfDur
+      });
+      if (n.dots === 1) sn.addDotToAll();
       return sn;
     });
 
@@ -475,9 +370,7 @@ function renderPhrase(phrase){
   }
 }
 
-/* ----------------------------
-   Audio playback (Tone.js)
------------------------------ */
+/* ======= audio (Tone.js) ======= */
 let synth = null;
 let part = null;
 
@@ -513,11 +406,11 @@ function buildFluteishSynth(){
 
 function flattenToEvents(phrase){
   const events = [];
-  let t = 0; // beats
-  for (const measure of phrase){
-    for (const n of measure){
-      events.push({ timeBeats: t, note: n.toneName, dur: n.toneDur, beats: n.beats });
-      t += n.beats;
+  let tBeats = 0;
+  for (const bar of phrase){
+    for (const n of bar){
+      events.push({ timeBeats: tBeats, note: n.toneName, dur: n.toneDur, beats: n.beats });
+      tBeats += n.beats;
     }
   }
   return events;
@@ -559,17 +452,15 @@ function stopPlayback(){
   document.getElementById("btnPlay").disabled = false;
 }
 
-/* ----------------------------
-   UI wiring
------------------------------ */
+/* UI */
 function generateAndRender(){
   stopPlayback();
-  currentPhrase = generatePhrase();   // ✅ always fills 4/4 per bar
+  currentPhrase = generatePhrase();
   renderPhrase(currentPhrase);
 }
 
 document.getElementById("btnGen").addEventListener("click", generateAndRender);
-document.getElementById("btnPlay").addEventListener("click", () => playPhrase());
+document.getElementById("btnPlay").addEventListener("click", playPhrase);
 document.getElementById("btnStop").addEventListener("click", stopPlayback);
 
 generateAndRender();
