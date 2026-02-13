@@ -5,7 +5,9 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Valentine Flute Spark — Random Eb Major Line</title>
 
+  <!-- VexFlow (notation) -->
   <script src="https://unpkg.com/vexflow@4.2.3/build/cjs/vexflow.js"></script>
+  <!-- Tone.js (audio) -->
   <script src="https://unpkg.com/tone@14.8.49/build/Tone.js"></script>
 
   <style>
@@ -28,436 +30,263 @@
         linear-gradient(180deg, var(--bg1), #fff);
       overflow-x:hidden;
     }
-    .wrap{ position:relative; z-index:1; max-width:980px; margin:0 auto; padding:44px 18px 54px; }
-    header{ margin-bottom:18px; }
-    h1{ margin:0 0 8px 0; font-size: clamp(26px, 4vw, 40px); letter-spacing:-0.02em; line-height:1.05; }
-    .subtitle{ margin:0; color:var(--muted); font-size:15px; line-height:1.45; max-width:72ch; }
+
+    /* ❤️ Floating hearts */
+    .hearts{
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+    .heart{
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      transform: rotate(45deg);
+      background: linear-gradient(180deg, var(--accent2), var(--accent));
+      border-radius: 3px;
+      opacity: 0.55;
+      animation: floatUp linear infinite;
+      filter: drop-shadow(0 6px 8px rgba(255,59,122,.2));
+    }
+    .heart::before,
+    .heart::after{
+      content: "";
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      background: inherit;
+      border-radius: 50%;
+    }
+    .heart::before{ left: -8px; top: 0; }
+    .heart::after{ left: 0; top: -8px; }
+
+    @keyframes floatUp{
+      from{ transform: translateY(120vh) rotate(45deg); opacity:0; }
+      15%{ opacity:.6; }
+      to{ transform: translateY(-20vh) rotate(45deg); opacity:0; }
+    }
+
+    .wrap{
+      position:relative; z-index:1;
+      max-width:980px;
+      margin:0 auto;
+      padding:44px 18px 54px;
+    }
+
+    h1{
+      margin:0 0 8px;
+      font-size: clamp(26px, 4vw, 40px);
+      letter-spacing:-0.02em;
+    }
+    .subtitle{
+      margin:0;
+      color:var(--muted);
+      font-size:15px;
+      max-width:72ch;
+    }
 
     .card{
       background: var(--card);
       backdrop-filter: blur(10px);
-      border: 1px solid rgba(255,255,255,.7);
       border-radius: var(--radius);
       box-shadow: var(--shadow);
       overflow:hidden;
     }
+
     .topbar{
-      display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between;
-      gap:12px; padding:14px 16px;
-      border-bottom:1px solid rgba(50,20,35,.08);
+      display:flex;
+      gap:12px;
+      padding:14px 16px;
+      border-bottom:1px solid rgba(0,0,0,.08);
     }
-    .controls{ display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
+
     button{
-      appearance:none; border:none; padding:10px 14px; border-radius:14px; cursor:pointer;
-      font-weight:650; font-size:14px; letter-spacing:.01em; color:white;
+      border:none;
+      padding:10px 14px;
+      border-radius:14px;
+      cursor:pointer;
+      font-weight:650;
       background: linear-gradient(180deg, var(--accent2), var(--accent));
+      color:white;
       box-shadow: 0 10px 22px rgba(255,59,122,.25);
     }
     button.secondary{
-      color: var(--ink);
-      background: linear-gradient(180deg, #ffffff, #ffe9f2);
-      border: 1px solid rgba(255,59,122,.25);
-      box-shadow: 0 10px 22px rgba(30,10,20,.08);
+      background: linear-gradient(180deg, #fff, #ffe9f2);
+      color:var(--ink);
     }
-    button:disabled{ opacity:.55; cursor:not-allowed; }
+    button:disabled{ opacity:.55; }
 
     .stage{ padding:16px; }
 
-    /* IMPORTANT: give the container a real size on first paint */
     #notation{
       width:100%;
-      min-height: 180px;          /* prevents “0 height” first render */
+      min-height:190px;
       overflow-x:auto;
       padding:10px;
       border-radius:18px;
       background: rgba(255,255,255,.65);
-      border:1px solid rgba(50,20,35,.08);
+      border:1px solid rgba(0,0,0,.08);
     }
 
     .footer{
-      margin-top:14px; display:flex; flex-wrap:wrap; gap:10px;
-      align-items:center; justify-content:space-between;
-      color:var(--muted); font-size:13px; padding:0 6px;
+      margin-top:12px;
+      display:flex;
+      justify-content:space-between;
+      color:var(--muted);
+      font-size:13px;
     }
-    .small{ opacity:.9; line-height:1.4; }
   </style>
 </head>
 
 <body>
-  <div class="wrap">
-    <header>
-      <h1>Valentine Flute Spark 💘</h1>
-      <p class="subtitle">
-        Random fast flute passage in <b>E♭ major</b>. <b>3 bars</b>, always fits <b>4/4</b>.
-        Only rule: leaps ≤ <b>perfect fifth</b>.
-      </p>
-    </header>
+<div class="hearts" id="hearts"></div>
 
-    <div class="card">
-      <div class="topbar">
-        <div class="controls">
-          <button id="btnGen">Generate ✨</button>
-          <button id="btnPlay" class="secondary">Play ▶︎</button>
-          <button id="btnStop" class="secondary" disabled>Stop ■</button>
-        </div>
-      </div>
+<div class="wrap">
+  <h1>Valentine Flute Spark 💘</h1>
+  <p class="subtitle">
+    Random fast flute passage in <b>E♭ major</b>.  
+    <b>3 bars</b>, always fits <b>4/4</b>, leaps ≤ <b>perfect fifth</b>.
+  </p>
 
-      <div class="stage">
-        <div id="notation"></div>
-        <div class="footer">
-          <div class="small">If audio doesn’t start, click <b>Play</b> once more (browser gesture rule).</div>
-          <div class="small">VexFlow + Tone.js</div>
-        </div>
+  <div class="card">
+    <div class="topbar">
+      <button id="btnGen">Generate ✨</button>
+      <button id="btnPlay" class="secondary">Play ▶︎</button>
+      <button id="btnStop" class="secondary" disabled>Stop ■</button>
+    </div>
+
+    <div class="stage">
+      <div id="notation"></div>
+      <div class="footer">
+        <span>VexFlow + Tone.js</span>
+        <span>If audio doesn’t start, click Play again</span>
       </div>
     </div>
   </div>
+</div>
 
 <script>
-/* =========================
-   Settings
-========================= */
-const TEMPO = 156;
-const BARS = 3;
-const TIME_SIG = "4/4";
-const SCALE_VEX = ["eb","f","g","ab","bb","c","d"];
-const MIDI_MIN = 60, MIDI_MAX = 84;
-const MAX_LEAP_SEMITONES = 7;
+/* ❤️ hearts */
+(function(){
+  const wrap = document.getElementById("hearts");
+  for(let i=0;i<28;i++){
+    const h=document.createElement("div");
+    h.className="heart";
+    const s=10+Math.random()*16;
+    h.style.width=h.style.height=s+"px";
+    h.style.left=Math.random()*100+"vw";
+    h.style.animationDuration=(10+Math.random()*12)+"s";
+    h.style.animationDelay=(-Math.random()*10)+"s";
+    wrap.appendChild(h);
+  }
+})();
 
-const BAR_TICKS = 16; // 4/4 in 16th-ticks
+/* ================= MUSIC ENGINE ================= */
+const TEMPO=156, BARS=3;
+const SCALE=["eb","f","g","ab","bb","c","d"];
+const MAX_LEAP=7;
+const BAR_TICKS=16;
 
-const RHY_TOKENS = [
-  { ticks: 1, vf: "16", dots: 0, toneDur: "16n" },
-  { ticks: 2, vf: "8",  dots: 0, toneDur: "8n"  },
-  { ticks: 3, vf: "8",  dots: 1, toneDur: "8n." },
-  { ticks: 4, vf: "q",  dots: 0, toneDur: "4n"  },
-  { ticks: 6, vf: "q",  dots: 1, toneDur: "4n." },
-  { ticks: 8, vf: "h",  dots: 0, toneDur: "2n"  },
+const RHY=[
+  {t:1,v:"16",d:0,td:"16n"},
+  {t:2,v:"8",d:0,td:"8n"},
+  {t:3,v:"8",d:1,td:"8n."},
+  {t:4,v:"q",d:0,td:"4n"},
+  {t:6,v:"q",d:1,td:"4n."},
+  {t:8,v:"h",d:0,td:"2n"}
 ];
 
-function weightedChoice(items, weights){
-  const total = weights.reduce((a,b)=>a+b,0);
-  let r = Math.random()*total;
-  for (let i=0;i<items.length;i++){
-    r -= weights[i];
-    if (r <= 0) return items[i];
-  }
-  return items[items.length-1];
-}
-function pickRhythmToken(remainingTicks){
-  const choices = RHY_TOKENS.filter(t => t.ticks <= remainingTicks);
-  const weights = choices.map(t => {
-    if (t.ticks === 1) return 4.8;
-    if (t.ticks === 2) return 4.0;
-    if (t.ticks === 3) return 2.6;
-    if (t.ticks === 4) return 2.0;
-    if (t.ticks === 6) return 1.3;
-    if (t.ticks === 8) return 0.9;
-    return 1;
-  });
-  return weightedChoice(choices, weights);
+function randW(a,w){let s=w.reduce((x,y)=>x+y,0),r=Math.random()*s;
+for(let i=0;i<a.length;i++){r-=w[i];if(r<=0)return a[i];}return a[0];}
+
+function nextNote(pi,pm){
+  const deltas=[-4,-3,-2,-1,0,1,2,3,4];
+  const idx=(pi+deltas[Math.floor(Math.random()*deltas.length)]+7)%7;
+  const pc=SCALE[idx];
+  const oct=[4,5,6][Math.floor(Math.random()*3)];
+  const vk=`${pc}/${oct}`;
+  const tn=pc[0].toUpperCase()+"b"+oct;
+  const m=Tone.Frequency(tn).toMidi();
+  if(pm && Math.abs(m-pm)>MAX_LEAP) return nextNote(pi,pm);
+  return {idx,vk,tn,m};
 }
 
-function vexKey(pc, oct){ return `${pc}/${oct}`; }
-function vexToToneName(vk){
-  const [pc, oct] = vk.split("/");
-  const letter = pc[0].toUpperCase();
-  const accidental = pc.length > 1 ? "b" : "";
-  return `${letter}${accidental}${oct}`;
-}
-function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
-
-function candidateDeltas(){
-  return [
-    {d:-1,w:5.0},{d:+1,w:5.0},
-    {d:-2,w:3.2},{d:+2,w:3.2},
-    {d:-3,w:1.8},{d:+3,w:1.8},
-    {d:-4,w:1.0},{d:+4,w:1.0},
-    {d:0,w:1.4}
-  ];
-}
-function pickNextNote(prevIdx, prevMidi){
-  const deltas = candidateDeltas();
-  const baseOct = prevMidi
-    ? parseInt(Tone.Frequency(prevMidi, "midi").toNote().replace(/[A-G][b#]?/, ""), 10)
-    : 5;
-
-  const octChoices = [baseOct, baseOct+1, baseOct-1, baseOct+2, baseOct-2].map(o=>clamp(o,4,6));
-
-  const candidates = [];
-  for (const dd of deltas){
-    const idx = (prevIdx + dd.d + SCALE_VEX.length) % SCALE_VEX.length;
-    const pc = SCALE_VEX[idx];
-
-    for (const oct of octChoices){
-      const vk = vexKey(pc, oct);
-      const tn = vexToToneName(vk);
-      const midi = Tone.Frequency(tn).toMidi();
-
-      if (midi < MIDI_MIN || midi > MIDI_MAX) continue;
-      if (prevMidi != null && Math.abs(midi - prevMidi) > MAX_LEAP_SEMITONES) continue;
-
-      candidates.push({ idx, vexKey: vk, tone: tn, midi, w: dd.w });
-      break;
+function gen(){
+  let pi=Math.floor(Math.random()*7);
+  let pm=Tone.Frequency("Eb5").toMidi();
+  const out=[];
+  for(let b=0;b<BARS;b++){
+    let r=BAR_TICKS, bar=[];
+    while(r>0){
+      const tok=randW(RHY,RHY.map(x=>1));
+      if(tok.t>r) continue;
+      const n=nextNote(pi,pm);
+      bar.push({...tok,...n,beats:tok.t/4});
+      pi=n.idx; pm=n.m; r-=tok.t;
     }
+    out.push(bar);
   }
-  if (!candidates.length){
-    const pc = SCALE_VEX[prevIdx];
-    const vk = vexKey(pc, baseOct);
-    const tn = vexToToneName(vk);
-    const midi = Tone.Frequency(tn).toMidi();
-    return { idx: prevIdx, vexKey: vk, tone: tn, midi };
-  }
-  return weightedChoice(candidates, candidates.map(c=>c.w));
+  return out;
 }
 
-function generatePhrase(){
-  const measures = [];
-  let prevIdx = Math.floor(Math.random()*SCALE_VEX.length);
-  let prevMidi = Tone.Frequency("Eb5").toMidi();
-
-  for (let m=0; m<BARS; m++){
-    let remaining = BAR_TICKS;
-    const bar = [];
-
-    while (remaining > 0){
-      const tok = pickRhythmToken(remaining);
-      const picked = pickNextNote(prevIdx, prevMidi);
-
-      bar.push({
-        vexKey: picked.vexKey,
-        vfDur: tok.vf,
-        dots: tok.dots,
-        ticks: tok.ticks,
-        beats: tok.ticks / 4,
-        toneDur: tok.toneDur,
-        toneName: picked.tone
-      });
-
-      remaining -= tok.ticks;
-      prevIdx = picked.idx;
-      prevMidi = picked.midi;
-    }
-    measures.push(bar);
+/* ================= RENDER ================= */
+let phrase=null;
+function render(p){
+  const d=document.getElementById("notation");
+  d.innerHTML="";
+  const VF=Vex.Flow;
+  const maxN=Math.max(...p.map(b=>b.length));
+  const w=Math.max(900, maxN*90);
+  const r=new VF.Renderer(d,VF.Renderer.Backends.SVG);
+  r.resize(w,230);
+  const c=r.getContext();
+  const mw=(w-36)/BARS;
+  const st=[];
+  for(let i=0;i<BARS;i++){
+    const s=new VF.Stave(18+i*mw,70,mw);
+    if(i===0)s.addClef("treble").addTimeSignature("4/4").addKeySignature("Eb");
+    s.setContext(c).draw(); st.push(s);
   }
-  return measures;
-}
-
-/* =========================
-   Rendering (robust)
-   - waits for container width
-   - retries if SVG is empty
-   - rerenders on ResizeObserver
-========================= */
-let currentPhrase = null;
-
-function computeWidth(div, phrase){
-  const base = Math.max(760, div.clientWidth - 24);
-  const maxNotes = Math.max(...phrase.map(bar => bar.length));
-  const extra = Math.max(0, maxNotes - 12) * 24;
-  return Math.min(1700, base + extra);
-}
-
-function renderOnce(phrase){
-  const div = document.getElementById("notation");
-  div.innerHTML = "";
-
-  const VF = Vex.Flow;
-  const width = computeWidth(div, phrase);
-  const height = 230;
-
-  const renderer = new VF.Renderer(div, VF.Renderer.Backends.SVG);
-  renderer.resize(width, height);
-  const context = renderer.getContext();
-
-  const staveY = 64;
-  const margin = 18;
-  const totalStaveWidth = width - margin*2;
-  const measureWidth = totalStaveWidth / BARS;
-
-  const staves = [];
-  for (let i=0;i<BARS;i++){
-    const x = margin + i*measureWidth;
-    const stave = new VF.Stave(x, staveY, measureWidth);
-    if (i === 0){
-      stave.addClef("treble").addTimeSignature(TIME_SIG).addKeySignature("Eb");
-    }
-    stave.setContext(context).draw();
-    staves.push(stave);
-  }
-
-  for (let i=0;i<BARS;i++){
-    const bar = phrase[i];
-
-    const vexNotes = bar.map(n => {
-      const sn = new VF.StaveNote({ clef:"treble", keys:[n.vexKey], duration:n.vfDur });
-      if (n.dots === 1) sn.addDotToAll();
-      return sn;
+  p.forEach((bar,i)=>{
+    const notes=bar.map(n=>{
+      const sn=new VF.StaveNote({keys:[n.vk],duration:n.v});
+      if(n.d)sn.addDotToAll(); return sn;
     });
-
-    const beams = VF.Beam.generateBeams(vexNotes, { beam_rests:false });
-    const voice = new VF.Voice({ num_beats: 4, beat_value: 4 }).setStrict(true);
-    voice.addTickables(vexNotes);
-
-    new VF.Formatter().joinVoices([voice]).formatToStave([voice], staves[i], { padding: 10 });
-    voice.draw(context, staves[i]);
-    beams.forEach(b => b.setContext(context).draw());
-  }
-}
-
-function svgLooksValid(){
-  const div = document.getElementById("notation");
-  const svg = div.querySelector("svg");
-  if (!svg) return false;
-  // If there are noteheads/beams/etc, there will be lots of SVG paths/groups.
-  const paths = svg.querySelectorAll("path");
-  return paths.length > 20; // threshold that reliably distinguishes “blank” from “drawn”
-}
-
-async function renderWithGateAndRetry(phrase, maxTries = 8){
-  const div = document.getElementById("notation");
-
-  // Wait until the container has a real width (layout finished)
-  let tries = 0;
-  while (div.clientWidth < 300 && tries < maxTries){
-    await new Promise(r => requestAnimationFrame(r));
-    tries++;
-  }
-
-  // Also wait for fonts/layout to settle (helps Safari/GitHub Pages)
-  if (document.fonts && document.fonts.ready) {
-    try { await Promise.race([
-      document.fonts.ready,
-      new Promise(r => setTimeout(r, 250))
-    ]);} catch(e){}
-  }
-
-  // Try render; if SVG still looks empty, retry on next frames
-  for (let i=0;i<maxTries;i++){
-    try {
-      renderOnce(phrase);
-    } catch (e) {
-      // if VexFlow throws, retry next frame
-    }
-    await new Promise(r => requestAnimationFrame(r));
-    if (svgLooksValid()) return;
-  }
-
-  // Last resort: force a wider render
-  try {
-    div.style.minWidth = "900px";
-    renderOnce(phrase);
-  } catch(e){}
-}
-
-/* ResizeObserver: if container changes size after first paint, rerender */
-const notationEl = document.getElementById("notation");
-const ro = new ResizeObserver(() => {
-  if (currentPhrase) renderWithGateAndRetry(currentPhrase, 4);
-});
-ro.observe(notationEl);
-
-/* =========================
-   Audio
-========================= */
-let synth = null;
-let part = null;
-
-function buildFluteishSynth(){
-  const s = new Tone.Synth({
-    oscillator: { type: "sine" },
-    envelope: { attack: 0.01, decay: 0.08, sustain: 0.6, release: 0.10 }
+    const v=new VF.Voice({num_beats:4,beat_value:4}).setStrict(true);
+    v.addTickables(notes);
+    new VF.Formatter().joinVoices([v]).formatToStave([v],st[i]);
+    v.draw(c,st[i]);
+    VF.Beam.generateBeams(notes).forEach(b=>b.setContext(c).draw());
   });
-
-  const air = new Tone.NoiseSynth({
-    noise: { type: "pink" },
-    envelope: { attack: 0.005, decay: 0.05, sustain: 0.0, release: 0.06 }
-  });
-
-  const filter = new Tone.Filter(2000, "lowpass");
-  const reverb = new Tone.Reverb({ decay: 2.6, wet: 0.22 });
-  const gain = new Tone.Gain(0.9);
-
-  s.connect(filter);
-  air.connect(filter);
-  filter.connect(reverb);
-  reverb.connect(gain);
-  gain.toDestination();
-
-  return {
-    noteOn: (freq, time, dur) => {
-      s.triggerAttackRelease(freq, dur, time, 0.85);
-      air.triggerAttackRelease(dur, time, 0.25);
-    },
-    dispose: () => { s.dispose(); air.dispose(); filter.dispose(); reverb.dispose(); gain.dispose(); }
-  };
 }
 
-function flattenToEvents(phrase){
-  const events = [];
-  let tBeats = 0;
-  for (const bar of phrase){
-    for (const n of bar){
-      events.push({ timeBeats: tBeats, note: n.toneName, dur: n.toneDur, beats: n.beats });
-      tBeats += n.beats;
-    }
-  }
-  return events;
-}
-
-async function playPhrase(){
+/* ================= AUDIO ================= */
+let synth=null, part=null;
+async function play(){
   await Tone.start();
-  Tone.Transport.stop();
-  Tone.Transport.cancel();
-  Tone.Transport.bpm.value = TEMPO;
-
-  if (part){ part.dispose(); part = null; }
-  if (synth){ synth.dispose(); synth = null; }
-  synth = buildFluteishSynth();
-
-  const events = flattenToEvents(currentPhrase);
-  const beatSeconds = 60 / TEMPO;
-
-  part = new Tone.Part((time, value) => {
-    const freq = Tone.Frequency(value.note).toFrequency();
-    synth.noteOn(freq, time, value.dur);
-  }, events.map(e => [e.timeBeats * beatSeconds, e]));
-
+  Tone.Transport.stop(); Tone.Transport.cancel();
+  Tone.Transport.bpm.value=TEMPO;
+  synth=new Tone.Synth({oscillator:{type:"sine"}}).toDestination();
+  let t=0;
+  part=new Tone.Part((time,v)=>{
+    synth.triggerAttackRelease(v.tn,v.td,time);
+  }, phrase.flatMap(b=>b.map(n=>[t+=n.beats*60/TEMPO,n])));
   part.start(0);
-  Tone.Transport.start("+0.02");
-
-  document.getElementById("btnStop").disabled = false;
-  document.getElementById("btnPlay").disabled = true;
-
-  const totalSeconds = (BARS * 4) * beatSeconds;
-  Tone.Transport.scheduleOnce(() => stopPlayback(), totalSeconds + 0.10);
+  Tone.Transport.start();
 }
 
-function stopPlayback(){
-  try { Tone.Transport.stop(); Tone.Transport.cancel(); } catch(e){}
-  if (part){ part.dispose(); part = null; }
-  if (synth){ synth.dispose(); synth = null; }
-  document.getElementById("btnStop").disabled = true;
-  document.getElementById("btnPlay").disabled = false;
+function stop(){
+  Tone.Transport.stop(); Tone.Transport.cancel();
 }
 
-/* =========================
-   UI
-========================= */
-async function generateAndRender(){
-  stopPlayback();
-  currentPhrase = generatePhrase();
-  await renderWithGateAndRetry(currentPhrase, 8);
-}
+/* ================= UI ================= */
+document.getElementById("btnGen").onclick=()=>{phrase=gen();render(phrase);};
+document.getElementById("btnPlay").onclick=play;
+document.getElementById("btnStop").onclick=stop;
 
-document.getElementById("btnGen").addEventListener("click", generateAndRender);
-document.getElementById("btnPlay").addEventListener("click", playPhrase);
-document.getElementById("btnStop").addEventListener("click", stopPlayback);
-
-/* IMPORTANT: kick off after load so layout is ready */
-window.addEventListener("load", () => {
-  // do two frames to be extra safe on first paint
-  requestAnimationFrame(() => requestAnimationFrame(() => generateAndRender()));
-});
+window.onload=()=>{phrase=gen();render(phrase);};
 </script>
 </body>
 </html>
