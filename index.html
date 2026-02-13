@@ -136,7 +136,7 @@
     #notation {
       width: 100%;
       min-height: 280px;
-      overflow-x: auto; 
+      overflow-x: auto;
       overflow-y: hidden;
       -webkit-overflow-scrolling: touch;
       padding: 20px;
@@ -146,7 +146,7 @@
       scrollbar-width: thin;
       scrollbar-color: var(--accent2) transparent;
     }
-    #notation svg { display:block; margin: 0 auto; }
+    #notation svg { display:block; margin: 0; } /* important: don't auto-center wide SVG */
 
     .footer{
       margin-top: 14px;
@@ -187,7 +187,7 @@
 
         <div class="pill">
           <span class="badge"><span class="dot"></span>
-            <span id="meta">E♭ major • 4/4 • ♩=156 • 3 bars • 12 beats</span>
+            <span id="meta">E♭ major • 4/4 • ♩=156 • 3 bars • 12 beats • notes always render</span>
           </span>
         </div>
       </div>
@@ -203,9 +203,7 @@
   </div>
 
 <script>
-/* ----------------------------
-   Floating hearts
------------------------------ */
+/* Floating hearts */
 (function makeHearts(){
   const wrap = document.getElementById("hearts");
   const count = 26;
@@ -226,24 +224,22 @@
   }
 })();
 
-/* ----------------------------
-   Settings & Logic
------------------------------ */
+/* Settings */
 const TEMPO = 156;
 const BARS = 3;
 const TIME_SIG = "4/4";
 const SCALE_VEX = ["eb", "f", "g", "ab", "bb", "c", "d"];
-const MIDI_MIN = 60; 
-const MIDI_MAX = 84; 
-const MAX_LEAP_SEMITONES = 7; 
-const TICKS_PER_BAR = 16;
+const MIDI_MIN = 60;
+const MIDI_MAX = 84;
+const MAX_LEAP_SEMITONES = 7;
 
+const TICKS_PER_BAR = 16; // 16 sixteenth-notes = 4/4
+
+// ✅ ONLY durations that never confuse formatting: 16th, 8th, quarter
 const RHYTHMS = [
-  { ticks: 1, vf: "16", dots: 0, toneDur: "16n", beats: 0.25 },
-  { ticks: 2, vf: "8",  dots: 0, toneDur: "8n",  beats: 0.50 },
-  { ticks: 4, vf: "q",  dots: 0, toneDur: "4n",  beats: 1.00 },
-  { ticks: 6, vf: "q",  dots: 1, toneDur: "4n.", beats: 1.50 },
-  { ticks: 8, vf: "h",  dots: 0, toneDur: "2n",  beats: 2.00 }
+  { ticks: 1, vf: "16", toneDur: "16n", beats: 0.25 },
+  { ticks: 2, vf: "8",  toneDur: "8n",  beats: 0.50 },
+  { ticks: 4, vf: "q",  toneDur: "4n",  beats: 1.00 }
 ];
 
 function weightedChoice(items, weights){
@@ -261,31 +257,27 @@ function weightedRhythmPickTicks(remainingTicks){
   const weights = choices.map(r => {
     if (r.ticks === 1) return 5;
     if (r.ticks === 2) return 4;
-    if (r.ticks === 4) return 2.5;
-    if (r.ticks === 6) return 1.2;
-    if (r.ticks === 8) return 0.8;
+    if (r.ticks === 4) return 2;
     return 1;
   });
   return weightedChoice(choices, weights);
 }
 
 function vexKey(pc, oct){ return `${pc}/${oct}`; }
-
 function vexToToneName(vk){
   const [pc, oct] = vk.split("/");
   const letter = pc[0].toUpperCase();
   const accidental = pc.length > 1 ? "b" : "";
   return `${letter}${accidental}${oct}`;
 }
-
 function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
 
 function pickNextNote(prevIdx, prevMidi){
   const deltas = [
     {d:-1,w:5}, {d:+1,w:5},
     {d:-2,w:3}, {d:+2,w:3},
-    {d:0,w:1.5},
-    {d:-3,w:1.2}, {d:+3,w:1.2}
+    {d:0,w:1.2},
+    {d:-3,w:1}, {d:+3,w:1}
   ];
   const delta = weightedChoice(deltas, deltas.map(x=>x.w)).d;
 
@@ -332,7 +324,6 @@ function generatePhrase(){
       notes.push({
         vexKey: picked.vexKey,
         vfDur: r.vf,
-        dots: r.dots,
         ticks: r.ticks,
         beats: r.beats,
         toneDur: r.toneDur,
@@ -343,14 +334,13 @@ function generatePhrase(){
       prevIdx = picked.idx;
       prevMidi = picked.midi;
     }
+
     measures.push(notes);
   }
   return measures;
 }
 
-/* ----------------------------
-   Robust Rendering (FIXED)
------------------------------ */
+/* Rendering — brute reliable */
 let currentPhrase = null;
 
 function renderPhrase(phrase){
@@ -359,21 +349,19 @@ function renderPhrase(phrase){
   const VF = Vex.Flow;
 
   const maxNotesInBar = Math.max(...phrase.map(bar => bar.length));
-
-  // ✅ never let a dense bar collapse
-  const perBarMin = 320;
-  const perNote = 34;
+  const perBarMin = 360;
+  const perNote = 30;
   const perBar = Math.max(perBarMin, 160 + maxNotesInBar * perNote);
 
   const margin = 24;
   const width = Math.max(div.clientWidth - 40, margin*2 + perBar * BARS);
-  const height = 280;
+  const height = 290;
 
   const renderer = new VF.Renderer(div, VF.Renderer.Backends.SVG);
   renderer.resize(width, height);
   const context = renderer.getContext();
 
-  const staveY = 85;
+  const staveY = 90;
   const totalStaveWidth = width - margin * 2;
   const measureWidth = totalStaveWidth / BARS;
 
@@ -387,23 +375,21 @@ function renderPhrase(phrase){
   }
 
   for (let i=0; i<BARS; i++){
-    const vexNotes = phrase[i].map(n => {
-      const sn = new VF.StaveNote({ clef: "treble", keys: [n.vexKey], duration: n.vfDur });
-      if (n.dots === 1) sn.addDotToAll();
-      return sn;
-    });
+    const vexNotes = phrase[i].map(n => new VF.StaveNote({
+      clef: "treble",
+      keys: [n.vexKey],
+      duration: n.vfDur
+    }));
 
-    const voice = new VF.Voice({ num_beats: 4, beat_value: 4 }).setStrict(true);
+    // ✅ non-strict so VexFlow never aborts rendering
+    const voice = new VF.Voice({ num_beats: 4, beat_value: 4 }).setStrict(false);
     voice.addTickables(vexNotes);
 
-    const beams = VF.Beam.generateBeams(vexNotes, {
-      beam_rests: false,
-      groups: [new VF.Fraction(1, 2)]
-    });
+    const beams = VF.Beam.generateBeams(vexNotes, { beam_rests:false });
 
     new VF.Formatter()
       .joinVoices([voice])
-      .formatToStave([voice], staves[i], { padding: 12 });
+      .formatToStave([voice], staves[i], { padding: 10 });
 
     voice.draw(context, staves[i]);
     beams.forEach(b => b.setContext(context).draw());
@@ -414,7 +400,8 @@ function svgLooksDrawn(){
   const div = document.getElementById("notation");
   const svg = div.querySelector("svg");
   if (!svg) return false;
-  return svg.querySelectorAll("path").length > 50;
+  // Noteheads/beams/etc -> lots of paths
+  return svg.querySelectorAll("path").length > 60;
 }
 
 async function renderPhraseSafely(){
@@ -427,19 +414,17 @@ async function renderPhraseSafely(){
 
   if (document.fonts && document.fonts.ready){
     try {
-      await Promise.race([
-        document.fonts.ready,
-        new Promise(r => setTimeout(r, 200))
-      ]);
+      await Promise.race([document.fonts.ready, new Promise(r => setTimeout(r, 200))]);
     } catch(e){}
   }
 
-  for (let i=0; i<10; i++){
+  for (let i=0; i<12; i++){
     try { renderPhrase(currentPhrase); } catch(e) {}
     await new Promise(r => requestAnimationFrame(r));
     if (svgLooksDrawn()) return;
   }
 
+  // last resort: force width & try once
   div.style.minWidth = "1600px";
   await new Promise(r => requestAnimationFrame(r));
   renderPhrase(currentPhrase);
@@ -451,20 +436,33 @@ async function generateAndRender(){
   await renderPhraseSafely();
 }
 
-/* ----------------------------
-   Audio Handling
------------------------------ */
+/* Audio */
 let synth = null, part = null;
 
 function buildFluteishSynth(){
-  const s = new Tone.Synth({ oscillator: { type: "sine" }, envelope: { attack: 0.01, decay: 0.08, sustain: 0.6, release: 0.1 }});
-  const air = new Tone.NoiseSynth({ noise: { type: "pink" }, envelope: { attack: 0.005, decay: 0.05, sustain: 0, release: 0.06 }});
+  const s = new Tone.Synth({
+    oscillator: { type: "sine" },
+    envelope: { attack: 0.01, decay: 0.08, sustain: 0.6, release: 0.1 }
+  });
+  const air = new Tone.NoiseSynth({
+    noise: { type: "pink" },
+    envelope: { attack: 0.005, decay: 0.05, sustain: 0, release: 0.06 }
+  });
   const filter = new Tone.Filter(2000, "lowpass");
   const reverb = new Tone.Reverb({ decay: 2.6, wet: 0.22 });
   const gain = new Tone.Gain(0.8);
-  s.connect(filter); air.connect(filter); filter.connect(reverb); reverb.connect(gain); gain.toDestination();
-  return { 
-    noteOn: (freq, time, dur) => { s.triggerAttackRelease(freq, dur, time, 0.85); air.triggerAttackRelease(dur, time, 0.25); },
+
+  s.connect(filter);
+  air.connect(filter);
+  filter.connect(reverb);
+  reverb.connect(gain);
+  gain.toDestination();
+
+  return {
+    noteOn: (freq, time, dur) => {
+      s.triggerAttackRelease(freq, dur, time, 0.85);
+      air.triggerAttackRelease(dur, time, 0.25);
+    },
     dispose: () => { s.dispose(); air.dispose(); filter.dispose(); reverb.dispose(); gain.dispose(); }
   };
 }
@@ -507,17 +505,14 @@ function stopPlayback(){
   document.getElementById("btnPlay").disabled = false;
 }
 
-/* ----------------------------
-   Events
------------------------------ */
+/* Events */
 document.getElementById("btnGen").addEventListener("click", generateAndRender);
 document.getElementById("btnPlay").addEventListener("click", playPhrase);
 document.getElementById("btnStop").addEventListener("click", stopPlayback);
 
-// ✅ safe rerender on resize
-window.addEventListener('resize', () => currentPhrase && renderPhraseSafely());
+window.addEventListener("resize", () => currentPhrase && renderPhraseSafely());
 
-// ✅ render after load + 2 frames
+// render after load + 2 frames (stable layout)
 window.addEventListener("load", () => {
   requestAnimationFrame(() => requestAnimationFrame(() => generateAndRender()));
 });
