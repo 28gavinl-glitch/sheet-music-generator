@@ -7,22 +7,26 @@
 
   <!-- VexFlow (notation) -->
   <script src="https://unpkg.com/vexflow@4.2.3/build/cjs/vexflow.js"></script>
-
-  <!-- SoundFont playback (sampled “MIDI-like” flute) -->
-  <script src="https://unpkg.com/soundfont-player@0.15.7/dist/soundfont-player.js"></script>
+  <!-- Tone.js (audio) -->
+  <script src="https://unpkg.com/tone@14.8.49/build/Tone.js"></script>
 
   <style>
     :root{
-      --bg1:#fff5f8; --bg2:#ffe3ee; --card:#ffffffcc;
-      --ink:#2a1b22; --muted:#6a4a58;
-      --accent:#ff3b7a; --accent2:#ff7aa8;
-      --shadow: 0 18px 50px rgba(30,10,20,.12);
+      --bg1:#fff5f8;
+      --bg2:#ffe3ee;
+      --card:#ffffffcc;
+      --ink:#2a1b22;
+      --muted:#6a4a58;
+      --accent:#ff3b7a;
+      --accent2:#ff7aa8;
+      --shadow: 0 18px 50px rgba(30, 10, 20, .12);
       --radius: 22px;
     }
     *{box-sizing:border-box}
     body{
-      margin:0; min-height:100vh;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      margin:0;
+      min-height:100vh;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
       color:var(--ink);
       background:
         radial-gradient(1200px 800px at 20% 10%, var(--bg2), transparent 60%),
@@ -31,74 +35,124 @@
         linear-gradient(180deg, var(--bg1), #fff);
       overflow-x:hidden;
     }
+
     .hearts{ position:fixed; inset:0; pointer-events:none; z-index:0; opacity:.55; }
     .heart{
-      position:absolute; width:16px; height:16px; transform: rotate(45deg);
+      position:absolute;
+      width:16px; height:16px;
+      transform: rotate(45deg);
       background: linear-gradient(180deg, var(--accent2), var(--accent));
       border-radius: 3px;
       filter: drop-shadow(0 6px 8px rgba(255,59,122,.18));
       animation: floatUp linear infinite;
     }
-    .heart::before,.heart::after{
-      content:""; position:absolute; width:16px; height:16px; background:inherit; border-radius:50%;
+    .heart::before, .heart::after{
+      content:"";
+      position:absolute;
+      width:16px; height:16px;
+      background: inherit;
+      border-radius: 50%;
     }
-    .heart::before{ left:-8px; top:0; } .heart::after{ left:0; top:-8px; }
-    @keyframes floatUp{ from{transform:translateY(120vh) rotate(45deg);opacity:0} 15%{opacity:1} to{transform:translateY(-20vh) rotate(45deg);opacity:0} }
+    .heart::before{ left:-8px; top:0; }
+    .heart::after{ left:0; top:-8px; }
+    @keyframes floatUp{
+      from{ transform: translateY(120vh) rotate(45deg); opacity:0; }
+      15%{opacity:1;}
+      to{ transform: translateY(-20vh) rotate(45deg); opacity:0; }
+    }
 
-    .wrap{ position:relative; z-index:1; max-width: 980px; margin:0 auto; padding:44px 18px 54px; }
-    header{ margin-bottom:18px; }
-    h1{ margin:0 0 8px 0; font-size: clamp(26px, 4vw, 40px); letter-spacing:-0.02em; line-height:1.05; }
-    .subtitle{ margin:0; color:var(--muted); font-size:15px; line-height:1.45; max-width:72ch; }
+    .wrap{
+      position:relative; z-index:1;
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 44px 18px 54px;
+    }
+
+    header{ display:flex; align-items:flex-start; justify-content:space-between; gap:16px; margin-bottom:18px; }
+    .title{ flex:1; }
+    h1{ margin:0 0 8px 0; font-size: clamp(26px, 4vw, 40px); letter-spacing: -0.02em; line-height:1.05; }
+    .subtitle{ margin:0; color:var(--muted); font-size: 15px; line-height:1.45; max-width: 70ch; }
 
     .card{
-      background: var(--card); backdrop-filter: blur(10px);
-      border:1px solid rgba(255,255,255,.7);
+      background: var(--card);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,.7);
       border-radius: var(--radius);
       box-shadow: var(--shadow);
       overflow:hidden;
     }
+
     .topbar{
-      display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between;
-      gap:12px; padding:14px 16px;
-      border-bottom:1px solid rgba(50,20,35,.08);
+      display:flex;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding: 14px 16px;
+      border-bottom: 1px solid rgba(50,20,35,.08);
     }
+
     .controls{ display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
+
     button{
-      appearance:none; border:none; padding:10px 14px; border-radius:14px; cursor:pointer;
-      font-weight:650; font-size:14px; letter-spacing:.01em; color:white;
+      appearance:none;
+      border:none;
+      padding: 10px 14px;
+      border-radius: 14px;
+      cursor:pointer;
+      font-weight:650;
+      font-size:14px;
+      letter-spacing:.01em;
+      color:white;
       background: linear-gradient(180deg, var(--accent2), var(--accent));
       box-shadow: 0 10px 22px rgba(255,59,122,.25);
+      transition: transform .08s ease, box-shadow .2s ease, opacity .2s ease;
     }
+    button:active{ transform: translateY(1px) scale(.99); }
     button.secondary{
       color: var(--ink);
       background: linear-gradient(180deg, #ffffff, #ffe9f2);
-      border:1px solid rgba(255,59,122,.25);
+      border: 1px solid rgba(255,59,122,.25);
       box-shadow: 0 10px 22px rgba(30,10,20,.08);
     }
     button:disabled{ opacity:.55; cursor:not-allowed; }
 
-    .pill{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; color:var(--muted); font-size:13px; }
+    .pill{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; color: var(--muted); font-size: 13px; }
     .badge{
-      display:inline-flex; align-items:center; gap:8px;
-      padding:7px 10px; border-radius:999px;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 7px 10px;
+      border-radius: 999px;
       background: rgba(255,255,255,.75);
-      border:1px solid rgba(50,20,35,.08);
+      border: 1px solid rgba(50,20,35,.08);
     }
-    .dot{ width:10px; height:10px; border-radius:999px; background:var(--accent); box-shadow:0 0 0 4px rgba(255,59,122,.15); }
+    .dot{
+      width:10px;height:10px;border-radius:999px;
+      background: var(--accent);
+      box-shadow: 0 0 0 4px rgba(255,59,122,.15);
+    }
 
-    .stage{ padding:16px; }
+    .stage{ padding: 16px; }
     #notation{
       width:100%;
       overflow-x:auto;
-      padding:10px;
-      border-radius:18px;
+      padding: 10px;
+      border-radius: 18px;
       background: rgba(255,255,255,.65);
-      border:1px solid rgba(50,20,35,.08);
+      border: 1px solid rgba(50,20,35,.08);
     }
+
     .footer{
-      margin-top:14px; display:flex; flex-wrap:wrap; gap:10px;
-      align-items:center; justify-content:space-between;
-      color:var(--muted); font-size:13px; padding:0 6px;
+      margin-top: 14px;
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      align-items:center;
+      justify-content:space-between;
+      color: var(--muted);
+      font-size: 13px;
+      padding: 0 6px;
     }
     .small{ opacity:.9; line-height:1.4; }
   </style>
@@ -109,32 +163,34 @@
 
   <div class="wrap">
     <header>
-      <h1>Valentine Flute Spark 💘</h1>
-      <p class="subtitle">
-        Fast one-line flute passage in <b>E♭ major</b> with strict rules:
-        <b>no repeated adjacent notes</b>, leaps ≤ <b>perfect fifth</b>,
-        16ths only as <b>2</b> in a row, <b>4</b> in a row, or <b>16th + dotted 8th</b>,
-        and <b>no bar ends on a 16th</b>.
-      </p>
+      <div class="title">
+        <h1>Valentine Flute Spark 💘</h1>
+        <p class="subtitle">
+          Random one-line, fast-tempo flute passage in <b>E♭ major</b>.
+          Click <b>Generate</b> for a new line and <b>Play</b> to hear it.
+          <br><span style="color:var(--muted)">Rules: always fits <b>4/4</b>, <b>3 bars</b>, leaps ≤ <b>perfect fifth</b>.</span>
+        </p>
+      </div>
     </header>
 
     <div class="card">
       <div class="topbar">
         <div class="controls">
           <button id="btnGen">Generate ✨</button>
-          <button id="btnPlay" class="secondary">Play (Flute) ▶︎</button>
+          <button id="btnPlay" class="secondary">Play ▶︎</button>
           <button id="btnStop" class="secondary" disabled>Stop ■</button>
         </div>
+
         <div class="pill">
-          <span class="badge"><span class="dot"></span><span id="meta">E♭ major • 4/4 • ♩=156 • 4 bars</span></span>
+          <span class="badge"><span class="dot"></span><span id="meta">E♭ major • 4/4 • ♩=156 • 3 bars</span></span>
         </div>
       </div>
 
       <div class="stage">
         <div id="notation"></div>
         <div class="footer">
-          <div class="small">If audio doesn’t start, click <b>Play</b> once more (browser gesture rule).</div>
-          <div class="small">VexFlow + SoundFont flute</div>
+          <div class="small">Tip: if audio doesn’t start, click <b>Play</b> once more (browser gesture rule).</div>
+          <div class="small">VexFlow + Tone.js</div>
         </div>
       </div>
     </div>
@@ -165,352 +221,208 @@
 })();
 
 /* ----------------------------
-   Core settings
+   Settings
 ----------------------------- */
 const TEMPO = 156;
-const BARS = 4;
+const BARS = 3;                 // ✅ per your request
 const TIME_SIG = "4/4";
 
-const SCALE_VEX = ["eb","f","g","ab","bb","c","d"]; // Eb major
+// Eb major: Eb F G Ab Bb C D (diatonic)
+const SCALE_VEX = ["eb", "f", "g", "ab", "bb", "c", "d"];
+
+// Flute-ish range boundaries
 const MIDI_MIN = 60; // C4
 const MIDI_MAX = 84; // C6
-const MAX_LEAP = 7;  // semitones (perfect fifth)
 
-// Utility
-function randInt(n){ return Math.floor(Math.random()*n); }
-function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
+// ✅ Only rule: leaps no bigger than a FIFTH (<= 7 semitones)
+const MAX_LEAP_SEMITONES = 7;
+
+// Rhythm atoms: ONLY choose durations that can EXACTLY fill 4 beats
+// (quarter, eighth, sixteenth, half, dotted quarter, dotted eighth)
+const RHYTHMS = [
+  { beats: 0.25, vf: "16", toneDur: "16n" },
+  { beats: 0.50, vf: "8",  toneDur: "8n"  },
+  { beats: 0.75, vf: "8d", toneDur: "8n." },  // dotted eighth
+  { beats: 1.00, vf: "q",  toneDur: "4n"  },
+  { beats: 1.50, vf: "qd", toneDur: "4n." },  // dotted quarter
+  { beats: 2.00, vf: "h",  toneDur: "2n"  }
+];
+
+// Weighted pick (favor faster motion a bit)
 function weightedChoice(items, weights){
   const total = weights.reduce((a,b)=>a+b,0);
   let r = Math.random()*total;
-  for (let i=0;i<items.length;i++){ r -= weights[i]; if (r <= 0) return items[i]; }
+  for (let i=0;i<items.length;i++){
+    r -= weights[i];
+    if (r <= 0) return items[i];
+  }
   return items[items.length-1];
 }
+
+function pickRhythmThatFits(remaining){
+  const choices = RHYTHMS.filter(r => r.beats <= remaining + 1e-9);
+
+  // IMPORTANT: prevent getting stuck with impossible leftover (like 0.10 etc)
+  // Since our beats are multiples of 0.25, remaining will always be multiple of 0.25
+  // as long as we subtract only these values. So it will ALWAYS finish exactly.
+
+  const weights = choices.map(r => {
+    if (r.beats === 0.25) return 4.8;
+    if (r.beats === 0.50) return 4.0;
+    if (r.beats === 0.75) return 2.6;
+    if (r.beats === 1.00) return 2.0;
+    if (r.beats === 1.50) return 1.3;
+    if (r.beats === 2.00) return 0.9;
+    return 1;
+  });
+  return weightedChoice(choices, weights);
+}
+
 function vexKey(pc, oct){ return `${pc}/${oct}`; }
-function vexToToneName(vk){
-  const [pc, oct] = vk.split("/");
+
+function vexToToneName(vexKey){
+  // "eb/5" -> "Eb5"
+  const [pc, oct] = vexKey.split("/");
   const letter = pc[0].toUpperCase();
   const accidental = pc.length > 1 ? "b" : "";
   return `${letter}${accidental}${oct}`;
 }
-// MIDI from note like "Eb5"
-function noteToMidi(note){
-  const m = note.match(/^([A-G])([b#]?)(\d)$/);
-  if (!m) return 72;
-  const letter = m[1], acc = m[2], oct = parseInt(m[3],10);
-  const base = {C:0,D:2,E:4,F:5,G:7,A:9,B:11}[letter];
-  const a = acc === "b" ? -1 : (acc === "#" ? 1 : 0);
-  return (oct + 1) * 12 + base + a;
+
+function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
+
+/* ----------------------------
+   Melody generation:
+   - diatonic Eb major
+   - enforce leap <= perfect fifth (<= 7 semitones)
+   - allow repeats (since you removed that restriction), but still mostly stepwise
+----------------------------- */
+function candidateDeltas(){
+  // scale-step deltas (allow up to 4 steps ~ a fifth-ish diatonically)
+  return [
+    {d:-1,w:5.0},{d:+1,w:5.0},
+    {d:-2,w:3.2},{d:+2,w:3.2},
+    {d:-3,w:1.8},{d:+3,w:1.8},
+    {d:-4,w:1.0},{d:+4,w:1.0},
+    {d:0,w:1.4} // allow occasional repeat
+  ];
 }
 
-/* ============================================================
-   1) RHYTHM: PRECOMPUTE valid 4/4 rhythm sequences for ONE BAR
-      No “try until it works”. We ONLY sample from valid sequences.
-   ============================================================ */
+function pickNextNote(prevIdx, prevMidi){
+  // Generate a short list of valid candidates (fast, no infinite loops)
+  const deltas = candidateDeltas();
+  const baseOct = prevMidi ? parseInt(Tone.Frequency(prevMidi, "midi").toNote().replace(/[A-G][b#]?/, ""), 10) : 5;
+  const octChoices = [baseOct, baseOct+1, baseOct-1, baseOct+2, baseOct-2].map(o=>clamp(o,4,6));
 
-/*
-Each note token is:
-{ beats: number, dur: "16"|"8"|"q"|"h", dots: 0|1 }
-
-Rules:
-- 16ths only appear as:
-  (a) 16+16
-  (b) 16+16+16+16
-  (c) 16 + dotted 8th
-- no bar ends on a 16th token
-*/
-
-const TOK = {
-  s16: {beats:0.25, dur:"16", dots:0},
-  e8:  {beats:0.50, dur:"8",  dots:0},
-  e8d: {beats:0.75, dur:"8",  dots:1},
-  q:   {beats:1.00, dur:"q",  dots:0},
-  qd:  {beats:1.50, dur:"q",  dots:1},
-  h:   {beats:2.00, dur:"h",  dots:0},
-};
-
-const CHUNKS = [
-  [TOK.e8],
-  [TOK.e8d],
-  [TOK.q],
-  [TOK.qd],
-  [TOK.h],
-  // 16th patterns
-  [TOK.s16, TOK.s16],                          // two 16ths
-  [TOK.s16, TOK.s16, TOK.s16, TOK.s16],        // four 16ths
-  [TOK.s16, TOK.e8d],                          // 16th + dotted 8th
-];
-
-function sumBeats(seq){ return seq.reduce((s,t)=>s+t.beats,0); }
-
-function isValidBar(seq){
-  const total = sumBeats(seq);
-  if (Math.abs(total - 4.0) > 1e-9) return false;
-  if (seq.length && seq[seq.length-1].dur === "16") return false; // no ending on 16th
-
-  // Enforce: 16ths only in allowed patterns, i.e. no single 16 and no 16 adjacent to non-16 except:
-  // - within a run of 2 or 4 16ths
-  // - or the special pattern 16 + dotted 8th
-  for (let i=0;i<seq.length;i++){
-    if (seq[i].dur !== "16") continue;
-
-    // If it's a 16th, check pattern context
-    const next = seq[i+1];
-    if (!next) return false;
-    if (next.dur === "16") {
-      // Must be part of run length 2 or 4
-      let run = 1;
-      let j = i+1;
-      while (j < seq.length && seq[j].dur === "16"){ run++; j++; }
-      if (!(run === 2 || run === 4)) return false;
-      i = j-1; // skip run
-    } else {
-      // Must be 16 + dotted 8th
-      if (!(next.dur === "8" && next.dots === 1)) return false;
-      i += 1; // skip next
-    }
-  }
-  return true;
-}
-
-let VALID_BAR_RHYTHMS = [];
-
-function buildValidBarRhythms(){
-  const results = [];
-  const target = 4.0;
-
-  function dfs(current, beats){
-    if (beats > target + 1e-9) return;
-    if (Math.abs(beats - target) < 1e-9){
-      if (isValidBar(current)) results.push(current.slice());
-      return;
-    }
-    for (const chunk of CHUNKS){
-      const b = sumBeats(chunk);
-      if (beats + b > target + 1e-9) continue;
-
-      // quick pruning: avoid ever leaving exactly 0.25 beats remaining (would force a forbidden single 16)
-      const remainingAfter = target - (beats + b);
-      if (Math.abs(remainingAfter - 0.25) < 1e-9) continue;
-
-      current.push(...chunk);
-      dfs(current, beats + b);
-      current.splice(current.length - chunk.length, chunk.length);
-    }
-  }
-
-  dfs([], 0);
-  // Keep a healthy variety: filter out bars that are too slow (e.g. two halves)
-  VALID_BAR_RHYTHMS = results.filter(seq => {
-    const count16 = seq.filter(t=>t.dur==="16").length;
-    const count8  = seq.filter(t=>t.dur==="8" && t.dots===0).length;
-    return (count16 + count8) >= 2; // at least some motion
-  });
-}
-
-buildValidBarRhythms();
-
-/* ============================================================
-   2) MELODY: generate pitches with guaranteed constraints
-      - no adjacent repeats
-      - leap <= fifth (7 semitones)
-      - diatonic Eb major
-      No “infinite while”; bounded backtracking per bar.
-   ============================================================ */
-
-// Candidate melodic movement in scale steps (up to about a fifth diatonically)
-const STEP_MOVES = [
-  {d:-1,w:5.2},{d:+1,w:5.2},
-  {d:-2,w:3.0},{d:+2,w:3.0},
-  {d:-3,w:1.6},{d:+3,w:1.6},
-  {d:-4,w:0.9},{d:+4,w:0.9},
-];
-
-function pickNextPitch(prevIdx, prevMidi){
-  // Build a small list of valid candidates (no repeat, leap<=5th, in range)
   const candidates = [];
-  for (const mv of STEP_MOVES){
-    const idx = (prevIdx + mv.d + SCALE_VEX.length) % SCALE_VEX.length;
+
+  for (const dd of deltas){
+    const idx = (prevIdx + dd.d + SCALE_VEX.length) % SCALE_VEX.length;
     const pc = SCALE_VEX[idx];
 
-    // Try nearby octaves to keep it smooth
-    const baseOct = prevMidi ? clamp(Math.floor(prevMidi/12)-1, 4, 6) : 5;
-    const octs = [baseOct, baseOct+1, baseOct-1, baseOct+2, baseOct-2].map(o=>clamp(o,4,6));
-
-    for (const oct of octs){
+    for (const oct of octChoices){
       const vk = vexKey(pc, oct);
       const tn = vexToToneName(vk);
-      const midi = noteToMidi(tn);
+      const midi = Tone.Frequency(tn).toMidi();
       if (midi < MIDI_MIN || midi > MIDI_MAX) continue;
+
       if (prevMidi != null){
         const diff = Math.abs(midi - prevMidi);
-        if (diff === 0) continue;
-        if (diff > MAX_LEAP) continue;
+        if (diff > MAX_LEAP_SEMITONES) continue;
       }
-      candidates.push({idx, vexKey:vk, toneName:tn, midi, w: mv.w});
-      break; // take closest octave that works for this step
+
+      candidates.push({ idx, vexKey: vk, tone: tn, midi, w: dd.w });
+      break; // closest octave that works for this scale step
     }
   }
 
-  if (!candidates.length) return null;
+  if (!candidates.length){
+    // last-resort: stay on same pitch class, clamp octave
+    const pc = SCALE_VEX[prevIdx];
+    const vk = vexKey(pc, baseOct);
+    const tn = vexToToneName(vk);
+    const midi = Tone.Frequency(tn).toMidi();
+    return { idx: prevIdx, vexKey: vk, tone: tn, midi };
+  }
+
   return weightedChoice(candidates, candidates.map(c=>c.w));
 }
 
-function makeMelodyForRhythm(barRhythm, startIdx, startMidi){
-  // Bounded backtracking over notes in THIS bar
-  const notes = [];
-  let prevIdx = startIdx;
-  let prevMidi = startMidi;
-
-  // Depth-first with retry limits per position
-  const maxRetriesPerNote = 18;
-  const tried = new Array(barRhythm.length).fill(0);
-
-  let i = 0;
-  while (i < barRhythm.length){
-    if (tried[i] > maxRetriesPerNote){
-      // backtrack
-      tried[i] = 0;
-      if (i === 0) return null; // fail this bar
-      notes.pop();
-      i--;
-      // restore prev to previous note (or start)
-      if (i === 0){
-        prevIdx = startIdx;
-        prevMidi = startMidi;
-      } else {
-        prevIdx = notes[i-1].scaleIdx;
-        prevMidi = notes[i-1].midi;
-      }
-      continue;
-    }
-
-    const pick = pickNextPitch(prevIdx, prevMidi);
-    tried[i]++;
-
-    if (!pick) continue;
-
-    // Extra guard: if we just backtracked, avoid picking exactly the same pitch again too often
-    if (notes.length && pick.midi === notes[notes.length-1].midi) continue;
-
-    notes.push({
-      scaleIdx: pick.idx,
-      vexKey: pick.vexKey,
-      toneName: pick.toneName,
-      midi: pick.midi
-    });
-
-    prevIdx = pick.idx;
-    prevMidi = pick.midi;
-    i++;
-  }
-
-  return {notes, endIdx: prevIdx, endMidi: prevMidi};
-}
-
-/* ============================================================
-   3) Generate full phrase instantly (4 bars)
-      - rhythm: sample from precomputed valid bars
-      - melody: bounded per-bar backtracking
-   ============================================================ */
-
 function generatePhrase(){
   const measures = [];
-
-  // Starting point: choose a mid-range scale degree, mid octave
-  let curIdx = randInt(SCALE_VEX.length);
-  let curMidi = noteToMidi("Eb5");
+  let prevIdx = Math.floor(Math.random()*SCALE_VEX.length);
+  let prevMidi = Tone.Frequency("Eb5").toMidi();
 
   for (let m=0; m<BARS; m++){
-    // pick a rhythm bar that won’t overcrowd too much
-    const rhythm = weightedChoice(
-      VALID_BAR_RHYTHMS,
-      VALID_BAR_RHYTHMS.map(seq => {
-        const n = seq.length;
-        // prefer 6–12 notes per bar for readability
-        if (n >= 6 && n <= 12) return 2.2;
-        if (n <= 5) return 1.3;
-        if (n <= 14) return 1.4;
-        return 0.8;
-      })
-    );
+    let remaining = 4.0; // ✅ EXACTLY 4/4 per bar
+    const notes = [];
 
-    // generate melody for that rhythm (bounded; if fail, pick a new rhythm a few times)
-    let melody = null;
-    for (let tries=0; tries<10 && !melody; tries++){
-      melody = makeMelodyForRhythm(rhythm, curIdx, curMidi);
-      if (!melody){
-        // swap rhythm and try again
-        // (still bounded and fast because VALID_BAR_RHYTHMS is precomputed)
-        // pick a different rhythm
-        const idx = randInt(VALID_BAR_RHYTHMS.length);
-        rhythm.length = 0;
-        rhythm.push(...VALID_BAR_RHYTHMS[idx]);
-      }
-    }
-    if (!melody){
-      // ultra-rare fallback: simple eighth-note bar
-      const fallbackRhythm = Array.from({length:8}, ()=>TOK.e8);
-      melody = makeMelodyForRhythm(fallbackRhythm, curIdx, curMidi);
+    // We will always finish because all rhythm values are multiples of 0.25
+    while (remaining > 1e-9){
+      const r = pickRhythmThatFits(remaining);
+      const picked = pickNextNote(prevIdx, prevMidi);
+
+      notes.push({
+        vexKey: picked.vexKey,
+        vfDur: r.vf,
+        beats: r.beats,
+        toneDur: r.toneDur,
+        toneName: picked.tone
+      });
+
+      remaining -= r.beats;
+      // snap small float errors
+      remaining = Math.round(remaining * 1000) / 1000;
+
+      prevIdx = picked.idx;
+      prevMidi = picked.midi;
     }
 
-    const bar = rhythm.map((rt, i) => ({
-      vfDur: rt.dur,
-      dots: rt.dots,
-      beats: rt.beats,
-      vexKey: melody.notes[i].vexKey,
-      toneName: melody.notes[i].toneName,
-      midi: melody.notes[i].midi
-    }));
-
-    // Ensure last token not 16th (already guaranteed by rhythm set)
-    measures.push(bar);
-    curIdx = melody.endIdx;
-    curMidi = melody.endMidi;
+    measures.push(notes);
   }
 
-  // Nice ending: try to land final note on Eb (closest allowed within leap <= 5th and not repeated)
-  const lastBar = measures[measures.length-1];
-  if (lastBar && lastBar.length >= 2){
-    const prev = lastBar[lastBar.length-2];
-    const prevMidi = prev.midi;
+  // Optional: end on tonic (Eb) while respecting the fifth rule
+  const lastMeasure = measures[BARS-1];
+  const last = lastMeasure[lastMeasure.length-1];
+  const prev = lastMeasure.length >= 2 ? lastMeasure[lastMeasure.length-2] : null;
 
-    const ebCandidates = [4,5,6].map(o => ({
-      toneName: `Eb${o}`,
-      vexKey: `eb/${o}`,
-      midi: noteToMidi(`Eb${o}`)
-    })).filter(c =>
-      c.midi >= MIDI_MIN && c.midi <= MIDI_MAX &&
-      c.midi !== prevMidi &&
-      Math.abs(c.midi - prevMidi) <= MAX_LEAP
-    );
-
-    if (ebCandidates.length){
-      ebCandidates.sort((a,b)=>Math.abs(a.midi-prevMidi)-Math.abs(b.midi-prevMidi));
-      const best = ebCandidates[0];
-      lastBar[lastBar.length-1].toneName = best.toneName;
-      lastBar[lastBar.length-1].vexKey = best.vexKey;
-      lastBar[lastBar.length-1].midi = best.midi;
+  if (prev){
+    const prevMidi2 = Tone.Frequency(prev.toneName).toMidi();
+    const octCandidates = [4,5,6];
+    let best = null;
+    let bestDiff = Infinity;
+    for (const oct of octCandidates){
+      const tn = `Eb${oct}`;
+      const midi = Tone.Frequency(tn).toMidi();
+      if (midi < MIDI_MIN || midi > MIDI_MAX) continue;
+      const diff = Math.abs(midi - prevMidi2);
+      if (diff <= MAX_LEAP_SEMITONES && diff < bestDiff){
+        bestDiff = diff;
+        best = { tn, oct };
+      }
+    }
+    if (best){
+      last.vexKey = `eb/${best.oct}`;
+      last.toneName = best.tn;
     }
   }
 
   return measures;
 }
 
-/* ============================================================
-   4) Render (fix overlap by giving enough width)
-      - Dotted notes handled via addDotToAll (NOT “8d” strings)
-      - Even spacing via formatToStave
-   ============================================================ */
-
+/* ----------------------------
+   Render notation (VexFlow)
+   - Even spacing: formatToStave per bar
+   - Correct dots by addDotToAll() (prevents weird overlapping)
+   - Key signature handles flats (no manual accidentals)
+----------------------------- */
 let currentPhrase = null;
 
-function computeRenderWidth(div, phrase){
-  // increase width when there are many notes to avoid collisions
-  const base = Math.max(740, div.clientWidth - 24);
-  const maxNotesInBar = Math.max(...phrase.map(b => b.length));
-  const extra = Math.max(0, maxNotesInBar - 10) * 26; // add width if >10 notes/bar
-  const perBar = 260 * BARS;
-  return Math.min(1600, Math.max(base, perBar + extra));
+function computeWidth(div, phrase){
+  // Wider if many notes, to avoid collisions (16ths-heavy bars)
+  const base = Math.max(720, div.clientWidth - 24);
+  const maxNotes = Math.max(...phrase.map(bar => bar.length));
+  const extra = Math.max(0, maxNotes - 10) * 22; // add width beyond 10 notes/bar
+  return Math.min(1400, base + extra);
 }
 
 function renderPhrase(phrase){
@@ -518,14 +430,14 @@ function renderPhrase(phrase){
   div.innerHTML = "";
 
   const VF = Vex.Flow;
-  const width = computeRenderWidth(div, phrase);
+  const width = computeWidth(div, phrase);
   const height = 220;
 
   const renderer = new VF.Renderer(div, VF.Renderer.Backends.SVG);
   renderer.resize(width, height);
   const context = renderer.getContext();
 
-  const staveY = 64;
+  const staveY = 62;
   const margin = 18;
   const totalStaveWidth = width - margin*2;
   const measureWidth = totalStaveWidth / BARS;
@@ -545,66 +457,66 @@ function renderPhrase(phrase){
     const bar = phrase[i];
 
     const vexNotes = bar.map(n => {
-      const sn = new VF.StaveNote({
-        clef: "treble",
-        keys: [n.vexKey],
-        duration: n.vfDur
-      });
-      if (n.dots === 1) sn.addDotToAll();
+      // Duration mapping: VexFlow expects "8" not "8d" if we use addDotToAll
+      const dur = (n.vfDur === "8d") ? "8" : (n.vfDur === "qd" ? "q" : n.vfDur);
+      const sn = new VF.StaveNote({ clef:"treble", keys:[n.vexKey], duration: dur });
+      if (n.vfDur === "8d" || n.vfDur === "qd") sn.addDotToAll();
       return sn;
     });
 
-    // Beam only 8ths/16ths (VexFlow handles grouping)
     const beams = VF.Beam.generateBeams(vexNotes, { beam_rests:false });
 
     const voice = new VF.Voice({ num_beats: 4, beat_value: 4 }).setStrict(true);
     voice.addTickables(vexNotes);
 
-    new VF.Formatter()
-      .joinVoices([voice])
-      .formatToStave([voice], staves[i], { padding: 10 });
-
+    new VF.Formatter().joinVoices([voice]).formatToStave([voice], staves[i], { padding: 10 });
     voice.draw(context, staves[i]);
     beams.forEach(b => b.setContext(context).draw());
   }
 }
 
-/* ============================================================
-   5) Audio: SoundFont flute (reliable)
-   ============================================================ */
+/* ----------------------------
+   Audio playback (Tone.js)
+----------------------------- */
+let synth = null;
+let part = null;
 
-let sfAudioCtx = null;
-let sfInstrument = null;
-let sfPlaying = [];
-let sfStopTimer = null;
+function buildFluteishSynth(){
+  const s = new Tone.Synth({
+    oscillator: { type: "sine" },
+    envelope: { attack: 0.01, decay: 0.08, sustain: 0.6, release: 0.10 }
+  });
 
-async function ensureFlute(){
-  if (!sfAudioCtx){
-    sfAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  }
-  if (sfAudioCtx.state === "suspended") await sfAudioCtx.resume();
+  const air = new Tone.NoiseSynth({
+    noise: { type: "pink" },
+    envelope: { attack: 0.005, decay: 0.05, sustain: 0.0, release: 0.06 }
+  });
 
-  if (!sfInstrument){
-    // MusyngKite is a popular high-quality SF set
-    sfInstrument = await Soundfont.instrument(sfAudioCtx, "flute", { soundfont: "MusyngKite" });
-  }
-}
+  const filter = new Tone.Filter(2000, "lowpass");
+  const reverb = new Tone.Reverb({ decay: 2.6, wet: 0.22 });
+  const gain = new Tone.Gain(0.9);
 
-function stopPlayback(){
-  try { sfPlaying.forEach(n => { try { n.stop(); } catch(e){} }); } catch(e){}
-  sfPlaying = [];
-  if (sfStopTimer){ clearTimeout(sfStopTimer); sfStopTimer = null; }
+  s.connect(filter);
+  air.connect(filter);
+  filter.connect(reverb);
+  reverb.connect(gain);
+  gain.toDestination();
 
-  document.getElementById("btnStop").disabled = true;
-  document.getElementById("btnPlay").disabled = false;
+  return {
+    noteOn: (freq, time, dur) => {
+      s.triggerAttackRelease(freq, dur, time, 0.85);
+      air.triggerAttackRelease(dur, time, 0.25);
+    },
+    dispose: () => { s.dispose(); air.dispose(); filter.dispose(); reverb.dispose(); gain.dispose(); }
+  };
 }
 
 function flattenToEvents(phrase){
   const events = [];
   let t = 0; // beats
-  for (const bar of phrase){
-    for (const n of bar){
-      events.push({ timeBeats: t, note: n.toneName, beats: n.beats });
+  for (const measure of phrase){
+    for (const n of measure){
+      events.push({ timeBeats: t, note: n.toneName, dur: n.toneDur, beats: n.beats });
       t += n.beats;
     }
   }
@@ -612,34 +524,47 @@ function flattenToEvents(phrase){
 }
 
 async function playPhrase(){
-  await ensureFlute();
-  stopPlayback();
+  await Tone.start();
+  Tone.Transport.stop();
+  Tone.Transport.cancel();
+  Tone.Transport.bpm.value = TEMPO;
+
+  if (part){ part.dispose(); part = null; }
+  if (synth){ synth.dispose(); synth = null; }
+  synth = buildFluteishSynth();
 
   const events = flattenToEvents(currentPhrase);
   const beatSeconds = 60 / TEMPO;
-  const startAt = sfAudioCtx.currentTime + 0.06;
 
-  for (const e of events){
-    const when = startAt + e.timeBeats * beatSeconds;
-    const durSec = e.beats * beatSeconds;
-    const node = sfInstrument.play(e.note, when, { duration: durSec, gain: 0.95 });
-    sfPlaying.push(node);
-  }
+  part = new Tone.Part((time, value) => {
+    const freq = Tone.Frequency(value.note).toFrequency();
+    synth.noteOn(freq, time, value.dur);
+  }, events.map(e => [e.timeBeats * beatSeconds, e]));
+
+  part.start(0);
+  Tone.Transport.start("+0.02");
 
   document.getElementById("btnStop").disabled = false;
   document.getElementById("btnPlay").disabled = true;
 
   const totalSeconds = (BARS * 4) * beatSeconds;
-  sfStopTimer = setTimeout(stopPlayback, (totalSeconds + 0.25) * 1000);
+  Tone.Transport.scheduleOnce(() => stopPlayback(), totalSeconds + 0.10);
 }
 
-/* ============================================================
-   UI wiring
-   ============================================================ */
+function stopPlayback(){
+  try { Tone.Transport.stop(); Tone.Transport.cancel(); } catch(e){}
+  if (part){ part.dispose(); part = null; }
+  if (synth){ synth.dispose(); synth = null; }
+  document.getElementById("btnStop").disabled = true;
+  document.getElementById("btnPlay").disabled = false;
+}
 
+/* ----------------------------
+   UI wiring
+----------------------------- */
 function generateAndRender(){
   stopPlayback();
-  currentPhrase = generatePhrase();   // instant: only samples from valid bars + bounded melody backtracking
+  currentPhrase = generatePhrase();   // ✅ always fills 4/4 per bar
   renderPhrase(currentPhrase);
 }
 
@@ -647,7 +572,6 @@ document.getElementById("btnGen").addEventListener("click", generateAndRender);
 document.getElementById("btnPlay").addEventListener("click", () => playPhrase());
 document.getElementById("btnStop").addEventListener("click", stopPlayback);
 
-// First render
 generateAndRender();
 </script>
 </body>
