@@ -11,8 +11,10 @@
   <style>
     :root{
       --bg1:#fff5f8; --bg2:#ffe3ee; --card:#ffffffcc;
-      --ink:#2a1b22; --muted:#6a4a58; --accent:#ff3b7a; --accent2:#ff7aa8;
-      --shadow: 0 18px 50px rgba(30, 10, 20, .12); --radius: 22px;
+      --ink:#2a1b22; --muted:#6a4a58;
+      --accent:#ff3b7a; --accent2:#ff7aa8;
+      --shadow: 0 18px 50px rgba(30,10,20,.12);
+      --radius: 22px;
     }
     *{box-sizing:border-box}
     body{
@@ -26,22 +28,10 @@
         linear-gradient(180deg, var(--bg1), #fff);
       overflow-x:hidden;
     }
-    .hearts{ position:fixed; inset:0; pointer-events:none; z-index:0; opacity:.55; }
-    .heart{
-      position:absolute; width:16px; height:16px; transform: rotate(45deg);
-      background: linear-gradient(180deg, var(--accent2), var(--accent));
-      border-radius: 3px;
-      filter: drop-shadow(0 6px 8px rgba(255,59,122,.18));
-      animation: floatUp linear infinite;
-    }
-    .heart::before,.heart::after{ content:""; position:absolute; width:16px; height:16px; background:inherit; border-radius:50%; }
-    .heart::before{ left:-8px; top:0; } .heart::after{ left:0; top:-8px; }
-    @keyframes floatUp{ from{ transform: translateY(120vh) rotate(45deg); opacity:0; } 15%{opacity:1;} to{ transform: translateY(-20vh) rotate(45deg); opacity:0; } }
-
     .wrap{ position:relative; z-index:1; max-width:980px; margin:0 auto; padding:44px 18px 54px; }
     header{ margin-bottom:18px; }
-    h1{ margin:0 0 8px 0; font-size: clamp(26px, 4vw, 40px); letter-spacing: -0.02em; line-height:1.05; }
-    .subtitle{ margin:0; color:var(--muted); font-size: 15px; line-height:1.45; max-width: 70ch; }
+    h1{ margin:0 0 8px 0; font-size: clamp(26px, 4vw, 40px); letter-spacing:-0.02em; line-height:1.05; }
+    .subtitle{ margin:0; color:var(--muted); font-size:15px; line-height:1.45; max-width:72ch; }
 
     .card{
       background: var(--card);
@@ -53,12 +43,12 @@
     }
     .topbar{
       display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between;
-      gap:12px; padding: 14px 16px;
-      border-bottom: 1px solid rgba(50,20,35,.08);
+      gap:12px; padding:14px 16px;
+      border-bottom:1px solid rgba(50,20,35,.08);
     }
     .controls{ display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
     button{
-      appearance:none; border:none; padding: 10px 14px; border-radius: 14px; cursor:pointer;
+      appearance:none; border:none; padding:10px 14px; border-radius:14px; cursor:pointer;
       font-weight:650; font-size:14px; letter-spacing:.01em; color:white;
       background: linear-gradient(180deg, var(--accent2), var(--accent));
       box-shadow: 0 10px 22px rgba(255,59,122,.25);
@@ -71,37 +61,29 @@
     }
     button:disabled{ opacity:.55; cursor:not-allowed; }
 
-    .pill{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; color: var(--muted); font-size: 13px; }
-    .badge{
-      display:inline-flex; align-items:center; gap:8px;
-      padding: 7px 10px; border-radius: 999px;
-      background: rgba(255,255,255,.75);
-      border: 1px solid rgba(50,20,35,.08);
-    }
-    .dot{ width:10px;height:10px;border-radius:999px; background: var(--accent); box-shadow: 0 0 0 4px rgba(255,59,122,.15); }
+    .stage{ padding:16px; }
 
-    .stage{ padding: 16px; }
+    /* IMPORTANT: give the container a real size on first paint */
     #notation{
       width:100%;
+      min-height: 180px;          /* prevents “0 height” first render */
       overflow-x:auto;
-      padding: 10px;
-      border-radius: 18px;
+      padding:10px;
+      border-radius:18px;
       background: rgba(255,255,255,.65);
-      border: 1px solid rgba(50,20,35,.08);
+      border:1px solid rgba(50,20,35,.08);
     }
 
     .footer{
-      margin-top: 14px; display:flex; flex-wrap:wrap; gap:10px;
+      margin-top:14px; display:flex; flex-wrap:wrap; gap:10px;
       align-items:center; justify-content:space-between;
-      color: var(--muted); font-size: 13px; padding: 0 6px;
+      color:var(--muted); font-size:13px; padding:0 6px;
     }
     .small{ opacity:.9; line-height:1.4; }
   </style>
 </head>
 
 <body>
-  <div class="hearts" id="hearts"></div>
-
   <div class="wrap">
     <header>
       <h1>Valentine Flute Spark 💘</h1>
@@ -118,10 +100,6 @@
           <button id="btnPlay" class="secondary">Play ▶︎</button>
           <button id="btnStop" class="secondary" disabled>Stop ■</button>
         </div>
-
-        <div class="pill">
-          <span class="badge"><span class="dot"></span><span id="meta">E♭ major • 4/4 • ♩=156 • 3 bars</span></span>
-        </div>
       </div>
 
       <div class="stage">
@@ -135,40 +113,18 @@
   </div>
 
 <script>
-/* hearts */
-(function makeHearts(){
-  const wrap = document.getElementById("hearts");
-  const count = 26;
-  for (let i=0;i<count;i++){
-    const h = document.createElement("div");
-    h.className = "heart";
-    const left = Math.random()*100;
-    const size = 10 + Math.random()*14;
-    const dur  = 8 + Math.random()*10;
-    const delay = -Math.random()*dur;
-    h.style.left = left + "vw";
-    h.style.width = size + "px";
-    h.style.height = size + "px";
-    h.style.animationDuration = dur + "s";
-    h.style.animationDelay = delay + "s";
-    h.style.opacity = (0.25 + Math.random()*0.6).toFixed(2);
-    wrap.appendChild(h);
-  }
-})();
-
-/* settings */
+/* =========================
+   Settings
+========================= */
 const TEMPO = 156;
 const BARS = 3;
 const TIME_SIG = "4/4";
-const SCALE_VEX = ["eb", "f", "g", "ab", "bb", "c", "d"];
-const MIDI_MIN = 60; // C4
-const MIDI_MAX = 84; // C6
+const SCALE_VEX = ["eb","f","g","ab","bb","c","d"];
+const MIDI_MIN = 60, MIDI_MAX = 84;
 const MAX_LEAP_SEMITONES = 7;
 
-/* ======= rhythm in integer ticks (16 ticks per bar) ======= */
-const BAR_TICKS = 16; // 4/4 = 16 sixteenth-notes
+const BAR_TICKS = 16; // 4/4 in 16th-ticks
 
-// tick values: 1=16th,2=8th,3=dotted8th,4=quarter,6=dottedQ,8=half
 const RHY_TOKENS = [
   { ticks: 1, vf: "16", dots: 0, toneDur: "16n" },
   { ticks: 2, vf: "8",  dots: 0, toneDur: "8n"  },
@@ -187,7 +143,6 @@ function weightedChoice(items, weights){
   }
   return items[items.length-1];
 }
-
 function pickRhythmToken(remainingTicks){
   const choices = RHY_TOKENS.filter(t => t.ticks <= remainingTicks);
   const weights = choices.map(t => {
@@ -202,7 +157,6 @@ function pickRhythmToken(remainingTicks){
   return weightedChoice(choices, weights);
 }
 
-/* ======= pitch helpers ======= */
 function vexKey(pc, oct){ return `${pc}/${oct}`; }
 function vexToToneName(vk){
   const [pc, oct] = vk.split("/");
@@ -221,10 +175,12 @@ function candidateDeltas(){
     {d:0,w:1.4}
   ];
 }
-
 function pickNextNote(prevIdx, prevMidi){
   const deltas = candidateDeltas();
-  const baseOct = prevMidi ? parseInt(Tone.Frequency(prevMidi, "midi").toNote().replace(/[A-G][b#]?/, ""), 10) : 5;
+  const baseOct = prevMidi
+    ? parseInt(Tone.Frequency(prevMidi, "midi").toNote().replace(/[A-G][b#]?/, ""), 10)
+    : 5;
+
   const octChoices = [baseOct, baseOct+1, baseOct-1, baseOct+2, baseOct-2].map(o=>clamp(o,4,6));
 
   const candidates = [];
@@ -236,6 +192,7 @@ function pickNextNote(prevIdx, prevMidi){
       const vk = vexKey(pc, oct);
       const tn = vexToToneName(vk);
       const midi = Tone.Frequency(tn).toMidi();
+
       if (midi < MIDI_MIN || midi > MIDI_MAX) continue;
       if (prevMidi != null && Math.abs(midi - prevMidi) > MAX_LEAP_SEMITONES) continue;
 
@@ -243,7 +200,6 @@ function pickNextNote(prevIdx, prevMidi){
       break;
     }
   }
-
   if (!candidates.length){
     const pc = SCALE_VEX[prevIdx];
     const vk = vexKey(pc, baseOct);
@@ -251,30 +207,28 @@ function pickNextNote(prevIdx, prevMidi){
     const midi = Tone.Frequency(tn).toMidi();
     return { idx: prevIdx, vexKey: vk, tone: tn, midi };
   }
-
   return weightedChoice(candidates, candidates.map(c=>c.w));
 }
 
-/* ======= generate phrase (EXACT 4/4 every bar) ======= */
 function generatePhrase(){
   const measures = [];
   let prevIdx = Math.floor(Math.random()*SCALE_VEX.length);
   let prevMidi = Tone.Frequency("Eb5").toMidi();
 
   for (let m=0; m<BARS; m++){
-    let remaining = BAR_TICKS; // integer ticks
-    const notes = [];
+    let remaining = BAR_TICKS;
+    const bar = [];
 
     while (remaining > 0){
       const tok = pickRhythmToken(remaining);
       const picked = pickNextNote(prevIdx, prevMidi);
 
-      notes.push({
+      bar.push({
         vexKey: picked.vexKey,
         vfDur: tok.vf,
         dots: tok.dots,
         ticks: tok.ticks,
-        beats: tok.ticks / 4,       // 4 ticks per beat
+        beats: tok.ticks / 4,
         toneDur: tok.toneDur,
         toneName: picked.tone
       });
@@ -283,42 +237,27 @@ function generatePhrase(){
       prevIdx = picked.idx;
       prevMidi = picked.midi;
     }
-
-    measures.push(notes);
+    measures.push(bar);
   }
-
-  // optional: end on Eb if possible within a 5th
-  const lastBar = measures[BARS-1];
-  if (lastBar.length >= 2){
-    const prev = lastBar[lastBar.length-2];
-    const prevMidi2 = Tone.Frequency(prev.toneName).toMidi();
-    const candidates = [4,5,6].map(o => ({
-      tn:`Eb${o}`, vk:`eb/${o}`, midi: Tone.Frequency(`Eb${o}`).toMidi()
-    })).filter(c => c.midi>=MIDI_MIN && c.midi<=MIDI_MAX && Math.abs(c.midi-prevMidi2)<=MAX_LEAP_SEMITONES);
-
-    if (candidates.length){
-      candidates.sort((a,b)=>Math.abs(a.midi-prevMidi2)-Math.abs(b.midi-prevMidi2));
-      const best = candidates[0];
-      const last = lastBar[lastBar.length-1];
-      last.toneName = best.tn;
-      last.vexKey = best.vk;
-    }
-  }
-
   return measures;
 }
 
-/* ======= render (no blank SVG; strict voice always valid now) ======= */
+/* =========================
+   Rendering (robust)
+   - waits for container width
+   - retries if SVG is empty
+   - rerenders on ResizeObserver
+========================= */
 let currentPhrase = null;
 
 function computeWidth(div, phrase){
-  const base = Math.max(720, div.clientWidth - 24);
+  const base = Math.max(760, div.clientWidth - 24);
   const maxNotes = Math.max(...phrase.map(bar => bar.length));
-  const extra = Math.max(0, maxNotes - 12) * 22;
-  return Math.min(1500, base + extra);
+  const extra = Math.max(0, maxNotes - 12) * 24;
+  return Math.min(1700, base + extra);
 }
 
-function renderPhrase(phrase){
+function renderOnce(phrase){
   const div = document.getElementById("notation");
   div.innerHTML = "";
 
@@ -350,17 +289,12 @@ function renderPhrase(phrase){
     const bar = phrase[i];
 
     const vexNotes = bar.map(n => {
-      const sn = new VF.StaveNote({
-        clef:"treble",
-        keys:[n.vexKey],
-        duration:n.vfDur
-      });
+      const sn = new VF.StaveNote({ clef:"treble", keys:[n.vexKey], duration:n.vfDur });
       if (n.dots === 1) sn.addDotToAll();
       return sn;
     });
 
     const beams = VF.Beam.generateBeams(vexNotes, { beam_rests:false });
-
     const voice = new VF.Voice({ num_beats: 4, beat_value: 4 }).setStrict(true);
     voice.addTickables(vexNotes);
 
@@ -370,7 +304,61 @@ function renderPhrase(phrase){
   }
 }
 
-/* ======= audio (Tone.js) ======= */
+function svgLooksValid(){
+  const div = document.getElementById("notation");
+  const svg = div.querySelector("svg");
+  if (!svg) return false;
+  // If there are noteheads/beams/etc, there will be lots of SVG paths/groups.
+  const paths = svg.querySelectorAll("path");
+  return paths.length > 20; // threshold that reliably distinguishes “blank” from “drawn”
+}
+
+async function renderWithGateAndRetry(phrase, maxTries = 8){
+  const div = document.getElementById("notation");
+
+  // Wait until the container has a real width (layout finished)
+  let tries = 0;
+  while (div.clientWidth < 300 && tries < maxTries){
+    await new Promise(r => requestAnimationFrame(r));
+    tries++;
+  }
+
+  // Also wait for fonts/layout to settle (helps Safari/GitHub Pages)
+  if (document.fonts && document.fonts.ready) {
+    try { await Promise.race([
+      document.fonts.ready,
+      new Promise(r => setTimeout(r, 250))
+    ]);} catch(e){}
+  }
+
+  // Try render; if SVG still looks empty, retry on next frames
+  for (let i=0;i<maxTries;i++){
+    try {
+      renderOnce(phrase);
+    } catch (e) {
+      // if VexFlow throws, retry next frame
+    }
+    await new Promise(r => requestAnimationFrame(r));
+    if (svgLooksValid()) return;
+  }
+
+  // Last resort: force a wider render
+  try {
+    div.style.minWidth = "900px";
+    renderOnce(phrase);
+  } catch(e){}
+}
+
+/* ResizeObserver: if container changes size after first paint, rerender */
+const notationEl = document.getElementById("notation");
+const ro = new ResizeObserver(() => {
+  if (currentPhrase) renderWithGateAndRetry(currentPhrase, 4);
+});
+ro.observe(notationEl);
+
+/* =========================
+   Audio
+========================= */
 let synth = null;
 let part = null;
 
@@ -452,18 +440,24 @@ function stopPlayback(){
   document.getElementById("btnPlay").disabled = false;
 }
 
-/* UI */
-function generateAndRender(){
+/* =========================
+   UI
+========================= */
+async function generateAndRender(){
   stopPlayback();
   currentPhrase = generatePhrase();
-  renderPhrase(currentPhrase);
+  await renderWithGateAndRetry(currentPhrase, 8);
 }
 
 document.getElementById("btnGen").addEventListener("click", generateAndRender);
 document.getElementById("btnPlay").addEventListener("click", playPhrase);
 document.getElementById("btnStop").addEventListener("click", stopPlayback);
 
-generateAndRender();
+/* IMPORTANT: kick off after load so layout is ready */
+window.addEventListener("load", () => {
+  // do two frames to be extra safe on first paint
+  requestAnimationFrame(() => requestAnimationFrame(() => generateAndRender()));
+});
 </script>
 </body>
 </html>
