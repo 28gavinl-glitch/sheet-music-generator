@@ -22,7 +22,6 @@
       --shadow: 0 18px 50px rgba(30, 10, 20, .12);
       --radius: 22px;
     }
-
     *{box-sizing:border-box}
     body{
       margin:0;
@@ -37,11 +36,7 @@
       overflow-x:hidden;
     }
 
-    /* floating hearts */
-    .hearts{
-      position:fixed; inset:0; pointer-events:none; z-index:0;
-      opacity:.55;
-    }
+    .hearts{ position:fixed; inset:0; pointer-events:none; z-index:0; opacity:.55; }
     .heart{
       position:absolute;
       width:16px; height:16px;
@@ -60,7 +55,6 @@
     }
     .heart::before{ left:-8px; top:0; }
     .heart::after{ left:0; top:-8px; }
-
     @keyframes floatUp{
       from{ transform: translateY(120vh) rotate(45deg); opacity:0; }
       15%{opacity:1;}
@@ -74,29 +68,10 @@
       padding: 44px 18px 54px;
     }
 
-    header{
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap:16px;
-      margin-bottom:18px;
-    }
-    .title{
-      flex:1;
-    }
-    h1{
-      margin:0 0 8px 0;
-      font-size: clamp(26px, 4vw, 40px);
-      letter-spacing: -0.02em;
-      line-height:1.05;
-    }
-    .subtitle{
-      margin:0;
-      color:var(--muted);
-      font-size: 15px;
-      line-height:1.45;
-      max-width: 62ch;
-    }
+    header{ display:flex; align-items:flex-start; justify-content:space-between; gap:16px; margin-bottom:18px; }
+    .title{ flex:1; }
+    h1{ margin:0 0 8px 0; font-size: clamp(26px, 4vw, 40px); letter-spacing: -0.02em; line-height:1.05; }
+    .subtitle{ margin:0; color:var(--muted); font-size: 15px; line-height:1.45; max-width: 62ch; }
 
     .card{
       background: var(--card);
@@ -117,12 +92,7 @@
       border-bottom: 1px solid rgba(50,20,35,.08);
     }
 
-    .controls{
-      display:flex;
-      flex-wrap:wrap;
-      gap:10px;
-      align-items:center;
-    }
+    .controls{ display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
 
     button{
       appearance:none;
@@ -145,16 +115,9 @@
       border: 1px solid rgba(255,59,122,.25);
       box-shadow: 0 10px 22px rgba(30,10,20,.08);
     }
-    button:disabled{
-      opacity:.55;
-      cursor:not-allowed;
-    }
+    button:disabled{ opacity:.55; cursor:not-allowed; }
 
-    .pill{
-      display:flex; gap:8px; align-items:center; flex-wrap:wrap;
-      color: var(--muted);
-      font-size: 13px;
-    }
+    .pill{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; color: var(--muted); font-size: 13px; }
     .badge{
       display:inline-flex;
       align-items:center;
@@ -170,14 +133,13 @@
       box-shadow: 0 0 0 4px rgba(255,59,122,.15);
     }
 
-    .stage{
-      padding: 16px;
-    }
+    .stage{ padding: 16px; }
 
+    /* Make sure nothing renders “off the page”; allow horizontal scroll if needed */
     #notation{
       width:100%;
       overflow-x:auto;
-      padding: 6px 6px 10px;
+      padding: 10px;
       border-radius: 18px;
       background: rgba(255,255,255,.65);
       border: 1px solid rgba(50,20,35,.08);
@@ -194,18 +156,7 @@
       font-size: 13px;
       padding: 0 6px;
     }
-
-    .small{
-      opacity:.9;
-      line-height:1.4;
-    }
-
-    a{
-      color: var(--accent);
-      text-decoration: none;
-      font-weight: 650;
-    }
-    a:hover{ text-decoration: underline; }
+    .small{ opacity:.9; line-height:1.4; }
   </style>
 </head>
 
@@ -217,8 +168,8 @@
       <div class="title">
         <h1>Valentine Flute Spark 💘</h1>
         <p class="subtitle">
-          Click <b>Generate</b> to create a one-line, fast-tempo flute passage with a diatonic melody in
-          <b>E♭ major</b>. Click <b>Play</b> for audio playback.
+          Random one-line, fast-tempo flute passage in <b>E♭ major</b>.
+          Click <b>Generate</b> for a new line and <b>Play</b> to hear it.
         </p>
       </div>
     </header>
@@ -232,20 +183,15 @@
         </div>
 
         <div class="pill">
-          <span class="badge"><span class="dot"></span><span id="meta">E♭ major • 4/4 • ♩=156 • 4 bars</span></span>
+          <span class="badge"><span class="dot"></span><span id="meta">E♭ major • 4/4 • ♩=156 • 4 bars • stepwise</span></span>
         </div>
       </div>
 
       <div class="stage">
         <div id="notation"></div>
-
         <div class="footer">
-          <div class="small">
-            Tip: if audio doesn’t start, click <b>Play</b> once more (browsers require a user gesture).
-          </div>
-          <div class="small">
-            Made with VexFlow + Tone.js — perfect for a sweet surprise.
-          </div>
+          <div class="small">Tip: if audio doesn’t start, click <b>Play</b> once more (browser gesture rule).</div>
+          <div class="small">VexFlow + Tone.js</div>
         </div>
       </div>
     </div>
@@ -253,7 +199,7 @@
 
 <script>
 /* ----------------------------
-   Cute floating hearts
+   Floating hearts
 ----------------------------- */
 (function makeHearts(){
   const wrap = document.getElementById("hearts");
@@ -264,7 +210,7 @@
     const left = Math.random()*100;
     const size = 10 + Math.random()*14;
     const dur  = 8 + Math.random()*10;
-    const delay = -Math.random()*dur; // start already in motion
+    const delay = -Math.random()*dur;
     h.style.left = left + "vw";
     h.style.width = size + "px";
     h.style.height = size + "px";
@@ -276,51 +222,27 @@
 })();
 
 /* ----------------------------
-   Music generation settings
+   Settings
 ----------------------------- */
-const TEMPO = 156;          // fast
-const BARS = 4;             // one-line phrase
+const TEMPO = 156;
+const BARS = 4;
 const TIME_SIG = "4/4";
-const KEY = "Eb";           // E♭ major
 
-// Diatonic notes in Eb major (spellings):
-// Eb F G Ab Bb C D (then Eb)
-const SCALE = [
-  { name:"eb", accidental:"b" },
-  { name:"f",  accidental:null },
-  { name:"g",  accidental:null },
-  { name:"ab", accidental:"b" },
-  { name:"bb", accidental:"b" },
-  { name:"c",  accidental:null },
-  { name:"d",  accidental:null }
-];
+// Diatonic pitch classes of Eb major: Eb F G Ab Bb C D
+const SCALE_VEX = ["eb", "f", "g", "ab", "bb", "c", "d"];
 
-// Flute-friendly range (approx): C4–C6
-const OCTAVES = [4,5,5,5,6]; // weighted toward middle/upper
+// Flute-ish range boundaries
+const MIDI_MIN = 60; // C4
+const MIDI_MAX = 84; // C6
 
-// Rhythm atoms (in beats, 1 beat = quarter note)
+// Rhythm atoms (beats, VF duration, Tone duration)
 const RHYTHMS = [
   { beats: 0.25, vf: "16", toneDur: "16n" },
   { beats: 0.50, vf: "8",  toneDur: "8n"  },
   { beats: 1.00, vf: "q",  toneDur: "4n"  },
-  { beats: 1.50, vf: "qd", toneDur: "4n." }, // dotted quarter
+  { beats: 1.50, vf: "qd", toneDur: "4n." },
   { beats: 2.00, vf: "h",  toneDur: "2n"  }
 ];
-
-// Prefer shorter values for "pretty fast" feel
-function weightedRhythmPick(remaining){
-  const choices = RHYTHMS.filter(r => r.beats <= remaining + 1e-9);
-  // weights: 16th highest, then 8th, then quarter, etc.
-  const weights = choices.map(r => {
-    if (r.beats === 0.25) return 5;
-    if (r.beats === 0.50) return 4;
-    if (r.beats === 1.00) return 2.5;
-    if (r.beats === 1.50) return 1.2;
-    if (r.beats === 2.00) return 0.8;
-    return 1;
-  });
-  return weightedChoice(choices, weights);
-}
 
 function weightedChoice(items, weights){
   const total = weights.reduce((a,b)=>a+b,0);
@@ -332,106 +254,166 @@ function weightedChoice(items, weights){
   return items[items.length-1];
 }
 
-// Melody: mostly stepwise with occasional small leaps
-function nextScaleIndex(prevIndex){
-  if (prevIndex == null) return Math.floor(Math.random()*SCALE.length);
-  const moves = [
-    { delta: -1, w: 4.5 },
-    { delta: +1, w: 4.5 },
-    { delta: -2, w: 2.0 },
-    { delta: +2, w: 2.0 },
-    { delta: -3, w: 0.9 },
-    { delta: +3, w: 0.9 },
-    { delta: -4, w: 0.4 },
-    { delta: +4, w: 0.4 }
-  ];
-  const choice = weightedChoice(moves, moves.map(m=>m.w));
-  let idx = prevIndex + choice.delta;
-  // wrap gently but keep diatonic
-  while (idx < 0) idx += SCALE.length;
-  while (idx >= SCALE.length) idx -= SCALE.length;
-  return idx;
+function weightedRhythmPick(remaining){
+  const choices = RHYTHMS.filter(r => r.beats <= remaining + 1e-9);
+  const weights = choices.map(r => {
+    if (r.beats === 0.25) return 5;
+    if (r.beats === 0.50) return 4;
+    if (r.beats === 1.00) return 2.5;
+    if (r.beats === 1.50) return 1.2;
+    if (r.beats === 2.00) return 0.8;
+    return 1;
+  });
+  return weightedChoice(choices, weights);
 }
 
-function pickOctave(prevMidi){
-  // slight "contour": keep near previous note if possible
-  const base = weightedChoice(OCTAVES, [1,3,4,3,1]); // bias to 5
-  return base;
-}
+function vexKey(pc, oct){ return `${pc}/${oct}`; }
 
-/* ----------------------------
-   Convert note to VexFlow key + Tone frequency
------------------------------ */
-function noteToVexKey(scaleIdx, octave){
-  const n = SCALE[scaleIdx];
-  // VexFlow key format: "eb/5" etc.
-  return `${n.name}/${octave}`;
-}
-
-function vexKeyToToneName(vexKey){
-  // Convert "eb/5" -> "Eb5", "bb/4" -> "Bb4"
+function vexToToneName(vexKey){
+  // "eb/5" -> "Eb5"
   const [pc, oct] = vexKey.split("/");
   const letter = pc[0].toUpperCase();
-  const accidental = pc.length > 1 ? "b" : ""; // only flats used here
+  const accidental = pc.length > 1 ? "b" : "";
   return `${letter}${accidental}${oct}`;
 }
 
 /* ----------------------------
-   Build 4 bars of notes (with rhythms)
+   Melody generation:
+   - diatonic Eb major
+   - leaps no bigger than a THIRD (<= 2 scale steps and <= 4 semitones)
 ----------------------------- */
+function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
+
+function candidateDeltas(){
+  // Mostly stepwise; allow repeated note sometimes
+  const deltas = [
+    {d:-1,w:5}, {d:+1,w:5},
+    {d:0,w:2.5},
+    {d:-2,w:2.5}, {d:+2,w:2.5}
+  ];
+  return deltas;
+}
+
+function pickNextNote(prevIdx, prevMidi){
+  // pick delta in [-2..+2]
+  const deltas = candidateDeltas();
+  const delta = weightedChoice(deltas, deltas.map(x=>x.w)).d;
+
+  let idx = (prevIdx + delta + SCALE_VEX.length) % SCALE_VEX.length;
+
+  // choose octave to keep pitch close and in range
+  // start from previous octave if possible
+  const prevOct = prevMidi ? Tone.Frequency(prevMidi, "midi").toNote().replace(/[A-G][b#]?/, "") : "5";
+  let baseOct = prevMidi ? parseInt(prevOct, 10) : 5;
+
+  const pc = SCALE_VEX[idx];
+
+  // Try a few octave candidates near baseOct, choose one that:
+  // - stays within MIDI range
+  // - keeps interval <= 4 semitones (minor/major third)
+  const octChoices = [baseOct, baseOct+1, baseOct-1, baseOct+2, baseOct-2].map(o=>clamp(o,4,6));
+
+  let best = null;
+  for (const oct of octChoices){
+    const vk = vexKey(pc, oct);
+    const tn = vexToToneName(vk);
+    const midi = Tone.Frequency(tn).toMidi();
+
+    if (midi < MIDI_MIN || midi > MIDI_MAX) continue;
+
+    if (prevMidi != null){
+      const diff = Math.abs(midi - prevMidi);
+      if (diff > 4) continue; // enforce <= M3
+    }
+    best = { idx, vexKey: vk, tone: tn, midi };
+    break;
+  }
+
+  // If we somehow can't satisfy <=4 semitones (rare), fall back to nearest in-range octave
+  if (!best){
+    let bestDiff = Infinity;
+    for (const oct of octChoices){
+      const vk = vexKey(pc, oct);
+      const tn = vexToToneName(vk);
+      const midi = Tone.Frequency(tn).toMidi();
+      if (midi < MIDI_MIN || midi > MIDI_MAX) continue;
+      const diff = prevMidi == null ? 0 : Math.abs(midi - prevMidi);
+      if (diff < bestDiff){
+        bestDiff = diff;
+        best = { idx, vexKey: vk, tone: tn, midi };
+      }
+    }
+  }
+
+  return best;
+}
+
 function generatePhrase(){
   const measures = [];
-  let prevIdx = null;
-  let prevMidi = null;
+  let prevIdx = Math.floor(Math.random()*SCALE_VEX.length);
+  let prevMidi = Tone.Frequency("Eb5").toMidi();
 
   for (let m=0; m<BARS; m++){
-    let remaining = 4.0; // 4/4
+    let remaining = 4.0;
     const notes = [];
+
     while (remaining > 1e-9){
       const r = weightedRhythmPick(remaining);
-      const idx = nextScaleIndex(prevIdx);
-
-      // choose octave, then keep within a comfortable range
-      let oct = pickOctave(prevMidi);
-
-      const vexKey = noteToVexKey(idx, oct);
-      const toneName = vexKeyToToneName(vexKey);
-
-      // crude midi check using Tone.Frequency
-      const midi = Tone.Frequency(toneName).toMidi();
-      // keep inside approx flute range (C4=60 to C6=84)
-      if (midi < 60) oct += 1;
-      if (midi > 84) oct -= 1;
-
-      const finalKey = noteToVexKey(idx, oct);
-      const finalTone = vexKeyToToneName(finalKey);
+      const picked = pickNextNote(prevIdx, prevMidi);
 
       notes.push({
-        vexKey: finalKey,
+        vexKey: picked.vexKey,
         vfDur: r.vf,
         beats: r.beats,
         toneDur: r.toneDur,
-        toneName: finalTone
+        toneName: picked.tone
       });
 
       remaining -= r.beats;
-      prevIdx = idx;
-      prevMidi = Tone.Frequency(finalTone).toMidi();
+      prevIdx = picked.idx;
+      prevMidi = picked.midi;
     }
+
     measures.push(notes);
   }
 
-  // End with a sweet cadence-ish: bias last note to Eb
-  const lastMeasure = measures[measures.length-1];
-  if (lastMeasure && lastMeasure.length){
-    lastMeasure[lastMeasure.length-1].vexKey = "eb/5";
-    lastMeasure[lastMeasure.length-1].toneName = "Eb5";
+  // End on tonic (Eb) without forcing a giant leap:
+  // Replace last pitch class with Eb but keep octave close to previous
+  const last = measures[BARS-1][measures[BARS-1].length-1];
+  const prev = measures[BARS-1].length >= 2 ? measures[BARS-1][measures[BARS-1].length-2] : null;
+  if (prev){
+    const prevMidi2 = Tone.Frequency(prev.toneName).toMidi();
+    const octCandidates = [4,5,6];
+    let best = null;
+    let bestDiff = Infinity;
+    for (const oct of octCandidates){
+      const tn = `Eb${oct}`;
+      const midi = Tone.Frequency(tn).toMidi();
+      const diff = Math.abs(midi - prevMidi2);
+      if (midi < MIDI_MIN || midi > MIDI_MAX) continue;
+      if (diff < bestDiff){
+        bestDiff = diff;
+        best = { tn, oct, diff };
+      }
+    }
+    if (best){
+      last.vexKey = `eb/${best.oct}`;
+      last.toneName = best.tn;
+    }
+  } else {
+    last.vexKey = "eb/5";
+    last.toneName = "Eb5";
   }
+
   return measures;
 }
 
 /* ----------------------------
    Render notation (VexFlow)
+   Fixes:
+   - Remove stave text that was clipping
+   - Even spacing: formatToStave per measure
+   - No extra accidental glyphs (key signature handles flats)
 ----------------------------- */
 let currentPhrase = null;
 
@@ -441,67 +423,50 @@ function renderPhrase(phrase){
 
   const VF = Vex.Flow;
 
-  // Create renderer
-  const width = Math.min(920, Math.max(640, div.clientWidth - 12));
+  const width = Math.min(920, Math.max(640, div.clientWidth - 24));
   const height = 210;
+
   const renderer = new VF.Renderer(div, VF.Renderer.Backends.SVG);
   renderer.resize(width, height);
   const context = renderer.getContext();
 
-  // Style
-  context.setFont("Arial", 10, "").setBackgroundFillStyle("transparent");
-
-  // Layout: 4 measures in one system
-  const staveY = 60;
+  const staveY = 62;
   const margin = 18;
   const totalStaveWidth = width - margin*2;
   const measureWidth = totalStaveWidth / BARS;
 
   const staves = [];
-
   for (let i=0;i<BARS;i++){
     const x = margin + i*measureWidth;
     const stave = new VF.Stave(x, staveY, measureWidth);
 
     if (i === 0){
       stave.addClef("treble").addTimeSignature(TIME_SIG).addKeySignature("Eb");
-      // a tiny romantic title
-      stave.setText("Flute — E♭ major (random love-line)", VF.Modifier.Position.ABOVE, { shift_y: -10 });
     }
     stave.setContext(context).draw();
     staves.push(stave);
   }
 
-  // Convert phrase to Vex notes per measure
-  const voiceNotes = phrase.map(measure => {
-    const vexNotes = measure.map(n => {
-      const note = new VF.StaveNote({
-        clef: "treble",
-        keys: [n.vexKey],
-        duration: n.vfDur
-      });
-
-      // add accidental if needed
-      if (n.vexKey.startsWith("eb") || n.vexKey.startsWith("ab") || n.vexKey.startsWith("bb")) {
-        note.addModifier(new VF.Accidental("b"), 0);
-      }
-      return note;
-    });
-
-    // Beam fast notes for readability
-    const beams = VF.Beam.generateBeams(vexNotes, { beam_rests: false });
-    return { vexNotes, beams };
-  });
-
-  // Draw voices + beams measure by measure
   for (let i=0;i<BARS;i++){
-    const voice = new VF.Voice({ num_beats: 4, beat_value: 4 }).setStrict(true);
-    voice.addTickables(voiceNotes[i].vexNotes);
+    const vexNotes = phrase[i].map(n => new VF.StaveNote({
+      clef: "treble",
+      keys: [n.vexKey],
+      duration: n.vfDur
+    }));
 
-    new VF.Formatter().joinVoices([voice]).format([voice], measureWidth - 20);
+    // Beam for 8ths/16ths for readability
+    const beams = VF.Beam.generateBeams(vexNotes, { beam_rests: false });
+
+    const voice = new VF.Voice({ num_beats: 4, beat_value: 4 }).setStrict(true);
+    voice.addTickables(vexNotes);
+
+    // Even spacing inside the measure
+    new VF.Formatter()
+      .joinVoices([voice])
+      .formatToStave([voice], staves[i], { padding: 8 });
 
     voice.draw(context, staves[i]);
-    voiceNotes[i].beams.forEach(b => b.setContext(context).draw());
+    beams.forEach(b => b.setContext(context).draw());
   }
 }
 
@@ -512,7 +477,6 @@ let synth = null;
 let part = null;
 
 function buildFluteishSynth(){
-  // light “flute-like” timbre: sine + gentle breathy noise
   const s = new Tone.Synth({
     oscillator: { type: "sine" },
     envelope: { attack: 0.01, decay: 0.08, sustain: 0.6, release: 0.10 }
@@ -534,30 +498,21 @@ function buildFluteishSynth(){
   reverb.connect(gain);
   gain.toDestination();
 
-  // return a small object so we can trigger both
   return {
     noteOn: (freq, time, dur) => {
       s.triggerAttackRelease(freq, dur, time, 0.85);
       air.triggerAttackRelease(dur, time, 0.25);
     },
-    dispose: () => {
-      s.dispose(); air.dispose(); filter.dispose(); reverb.dispose(); gain.dispose();
-    }
+    dispose: () => { s.dispose(); air.dispose(); filter.dispose(); reverb.dispose(); gain.dispose(); }
   };
 }
 
 function flattenToEvents(phrase){
-  // Build sequential events with Tone.Transport timing
-  // We schedule in 16n/8n/4n etc; Tone will handle tempo.
   const events = [];
-  let t = 0; // in beats
+  let t = 0; // beats
   for (const measure of phrase){
     for (const n of measure){
-      events.push({
-        timeBeats: t,
-        note: n.toneName,
-        dur: n.toneDur
-      });
+      events.push({ timeBeats: t, note: n.toneName, dur: n.toneDur, beats: n.beats });
       t += n.beats;
     }
   }
@@ -566,20 +521,13 @@ function flattenToEvents(phrase){
 
 async function playPhrase(){
   await Tone.start();
-
   Tone.Transport.bpm.value = TEMPO;
 
-  // clean up old
   if (part){ part.dispose(); part = null; }
   if (synth){ synth.dispose(); synth = null; }
-
   synth = buildFluteishSynth();
 
   const events = flattenToEvents(currentPhrase);
-
-  // Convert beats to Tone time: "0:0:0" style is possible, but easiest:
-  // use Tone.Time with "4n" mapping — we’ll schedule using seconds from beats:
-  // seconds = (60/bpm)*beats
   const beatSeconds = 60 / TEMPO;
 
   part = new Tone.Part((time, value) => {
@@ -590,30 +538,23 @@ async function playPhrase(){
   part.start(0);
   Tone.Transport.start();
 
-  // stop transport after phrase ends
-  const totalBeats = BARS * 4;
-  const totalSeconds = totalBeats * beatSeconds;
-
   document.getElementById("btnStop").disabled = false;
   document.getElementById("btnPlay").disabled = true;
 
-  // Schedule stop
-  Tone.Transport.scheduleOnce(() => {
-    stopPlayback();
-  }, totalSeconds + 0.05);
+  const totalSeconds = (BARS * 4) * beatSeconds;
+  Tone.Transport.scheduleOnce(() => stopPlayback(), totalSeconds + 0.05);
 }
 
 function stopPlayback(){
   try { Tone.Transport.stop(); Tone.Transport.cancel(); } catch(e){}
   if (part){ part.dispose(); part = null; }
   if (synth){ synth.dispose(); synth = null; }
-
   document.getElementById("btnStop").disabled = true;
   document.getElementById("btnPlay").disabled = false;
 }
 
 /* ----------------------------
-   Wiring UI
+   UI wiring
 ----------------------------- */
 function generateAndRender(){
   stopPlayback();
@@ -625,7 +566,6 @@ document.getElementById("btnGen").addEventListener("click", generateAndRender);
 document.getElementById("btnPlay").addEventListener("click", () => playPhrase());
 document.getElementById("btnStop").addEventListener("click", stopPlayback);
 
-// First render on load
 generateAndRender();
 </script>
 </body>
