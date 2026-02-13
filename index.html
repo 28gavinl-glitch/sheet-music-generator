@@ -3,55 +3,58 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Valentine Flute Spark — Stable Render</title>
+  <title>Valentine Flute Spark — Pro Edition</title>
 
   <script src="https://unpkg.com/vexflow@4.2.3/build/cjs/vexflow.js"></script>
   <script src="https://unpkg.com/tone@14.8.49/build/Tone.js"></script>
 
   <style>
-    :root{
+    :root {
       --bg1:#fff5f8; --bg2:#ffe3ee; --card:#ffffffcc;
       --ink:#2a1b22; --muted:#6a4a58; --accent:#ff3b7a;
       --accent2:#ff7aa8; --shadow: 0 18px 50px rgba(30, 10, 20, .12);
       --radius: 22px;
     }
-    *{box-sizing:border-box}
-    body{
-      margin:0; min-height:100vh;
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh;
       font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
-      color:var(--ink);
+      color: var(--ink);
       background: radial-gradient(1200px 800px at 20% 10%, var(--bg2), transparent 60%), linear-gradient(180deg, var(--bg1), #fff);
+      overflow-x: hidden;
     }
-    .hearts{ position:fixed; inset:0; pointer-events:none; z-index:0; opacity:.5; }
-    .heart{
-      position:absolute; width:16px; height:16px; transform: rotate(45deg);
+    .hearts { position: fixed; inset: 0; pointer-events: none; z-index: 0; opacity: 0.5; }
+    .heart {
+      position: absolute; width: 16px; height: 16px; transform: rotate(45deg);
       background: linear-gradient(180deg, var(--accent2), var(--accent));
       border-radius: 3px; animation: floatUp linear infinite;
     }
-    .heart::before, .heart::after{ content:""; position:absolute; width:16px; height:16px; background: inherit; border-radius: 50%; }
-    .heart::before{ left:-8px; top:0; } .heart::after{ left:0; top:-8px; }
-    @keyframes floatUp{ from{ transform: translateY(110vh) rotate(45deg); } to{ transform: translateY(-10vh) rotate(45deg); } }
+    .heart::before, .heart::after { content: ""; position: absolute; width: 16px; height: 16px; background: inherit; border-radius: 50%; }
+    .heart::before { left: -8px; top: 0; } .heart::after { left: 0; top: -8px; }
+    @keyframes floatUp { from { transform: translateY(110vh) rotate(45deg); } to { transform: translateY(-10vh) rotate(45deg); } }
 
-    .wrap{ position:relative; z-index:1; max-width: 900px; margin: 0 auto; padding: 40px 20px; }
-    .card{ background: var(--card); backdrop-filter: blur(10px); border-radius: var(--radius); border: 1px solid #fff; box-shadow: var(--shadow); overflow:hidden; }
-    .topbar{ display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px; padding: 16px; border-bottom: 1px solid rgba(0,0,0,0.05); }
-    .controls{ display:flex; gap:10px; }
+    .wrap { position: relative; z-index: 1; max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+    .card { background: var(--card); backdrop-filter: blur(10px); border-radius: var(--radius); border: 1px solid #fff; box-shadow: var(--shadow); overflow: hidden; }
+    .topbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding: 16px; border-bottom: 1px solid rgba(0,0,0,0.05); }
+    .controls { display: flex; gap: 10px; }
     
-    button{
-      border:none; padding: 10px 18px; border-radius: 12px; cursor:pointer; font-weight:600;
-      color:white; background: linear-gradient(180deg, var(--accent2), var(--accent));
+    button {
+      border: none; padding: 10px 18px; border-radius: 12px; cursor: pointer; font-weight: 600;
+      color: white; background: linear-gradient(180deg, var(--accent2), var(--accent));
       transition: transform 0.1s;
     }
-    button:active{ transform: scale(0.96); }
-    button.secondary{ color: var(--ink); background: #fff; border: 1px solid #ddd; }
-    button:disabled{ opacity: 0.4; }
+    button:active { transform: scale(0.96); }
+    button.secondary { color: var(--ink); background: #fff; border: 1px solid #ddd; }
+    button:disabled { opacity: 0.4; }
 
     #notation {
       width: 100%; min-height: 250px; overflow-x: auto; padding: 20px;
-      background: rgba(255,255,255,0.4); border-radius: 14px;
+      background: rgba(255,255,255,0.6); border-radius: 14px;
       margin: 15px; width: calc(100% - 30px);
+      scrollbar-width: thin;
+      scrollbar-color: var(--accent) transparent;
     }
-    #notation svg { display: block; }
+    #notation svg { display: block; min-width: 800px; }
   </style>
 </head>
 
@@ -60,7 +63,7 @@
   <div class="wrap">
     <header>
       <h1 style="margin-bottom:5px;">Valentine Flute Spark 💘</h1>
-      <p style="color:var(--muted); margin-top:0;">Fast E♭ Major Flute Lines (3 Measures)</p>
+      <p style="color:var(--muted); margin-top:0;">3 Measures • Ends on E♭ Half Note • Max Jump: 5th</p>
     </header>
 
     <div class="card">
@@ -70,30 +73,31 @@
           <button id="btnPlay" class="secondary">Play ▶︎</button>
           <button id="btnStop" class="secondary" disabled>Stop ■</button>
         </div>
-        <div style="font-size:13px; color:var(--muted); font-weight:600;">E♭ Major • 156 BPM</div>
+        <div style="font-size:13px; color:var(--muted); font-weight:600;">E♭ Major • ♩=156</div>
       </div>
       <div id="notation"></div>
     </div>
   </div>
 
 <script>
-/* Hearts Background */
+/* Hearts Logic */
 (function(){
   const wrap = document.getElementById("hearts");
-  for (let i=0; i<20; i++){
+  for (let i=0; i<25; i++){
     const h = document.createElement("div"); h.className = "heart";
     h.style.left = Math.random()*100 + "vw";
-    h.style.animationDuration = (6 + Math.random()*8) + "s";
+    h.style.animationDuration = (5 + Math.random()*10) + "s";
     h.style.animationDelay = (-Math.random()*10) + "s";
-    h.style.opacity = 0.2 + Math.random()*0.5;
+    h.style.opacity = 0.2 + Math.random()*0.4;
     wrap.appendChild(h);
   }
 })();
 
-/* Logic Settings */
+/* Musical Constraints */
 const TEMPO = 156;
 const BARS = 3;
 const SCALE = ["eb", "f", "g", "ab", "bb", "c", "d"];
+const SCALE_MIDI = [63, 65, 67, 68, 70, 72, 74]; // MIDI for Eb4 to D5
 const RHYTHMS = [
   { ticks: 1, vf: "16", tone: "16n", beats: 0.25 },
   { ticks: 2, vf: "8",  tone: "8n",  beats: 0.5 },
@@ -102,90 +106,125 @@ const RHYTHMS = [
 
 function generatePhrase() {
   const measures = [];
-  let prevIdx = 0;
-  for (let m=0; m<BARS; m++) {
-    let rem = 16;
+  let lastMidi = 75; // Starting note Eb5
+
+  for (let m = 0; m < BARS; m++) {
+    let remTicks = 16;
     const notes = [];
-    while (rem > 0) {
-      const r = RHYTHMS.filter(x => x.ticks <= rem)[Math.floor(Math.random() * RHYTHMS.filter(x => x.ticks <= rem).length)];
-      const idx = (prevIdx + (Math.floor(Math.random()*3)-1) + 7) % 7;
-      const oct = Math.random() > 0.5 ? 5 : 6;
-      notes.push({ keys: [`${SCALE[idx]}/${oct}`], duration: r.vf, tone: r.tone, beats: r.beats, rawKey: `${SCALE[idx]}${oct}` });
-      rem -= r.ticks;
-      prevIdx = idx;
+    
+    // Final measure constraint: end on a half note (8 ticks)
+    if (m === BARS - 1) remTicks = 8;
+
+    while (remTicks > 0) {
+      const possibleRhythms = RHYTHMS.filter(r => r.ticks <= remTicks);
+      const r = possibleRhythms[Math.floor(Math.random() * possibleRhythms.length)];
+      
+      // Select note with constraints:
+      // 1. No bigger than a 5th jump (7 semitones)
+      // 2. No consecutive repeated notes
+      let nextMidi;
+      let attempts = 0;
+      do {
+        const octaveOffset = (Math.floor(Math.random() * 2) + 4) * 12; // Octave 4 or 5
+        nextMidi = SCALE_MIDI[Math.floor(Math.random() * SCALE_MIDI.length)] + (Math.random() > 0.5 ? 12 : 0);
+        attempts++;
+      } while ((nextMidi === lastMidi || Math.abs(nextMidi - lastMidi) > 7) && attempts < 50);
+
+      const noteName = Tone.Frequency(nextMidi, "midi").toNote().toLowerCase().replace('#', 's');
+      const vfKey = noteName.replace(/([a-g])(b|s)?(\d)/, "$1$2/$3");
+
+      notes.push({ keys: [vfKey], duration: r.vf, tone: r.tone, beats: r.beats, midi: nextMidi });
+      remTicks -= r.ticks;
+      lastMidi = nextMidi;
     }
+
+    // Add final half-note E Flat to last bar
+    if (m === BARS - 1) {
+      notes.push({ keys: ["eb/5"], duration: "h", tone: "2n", beats: 2.0, midi: 75 });
+    }
+    
     measures.push(notes);
   }
   return measures;
 }
 
-function tryRender(phrase) {
+function render(phrase) {
   const div = document.getElementById("notation");
   div.innerHTML = "";
   const VF = Vex.Flow;
   
-  // Force a minimum width to prevent VexFlow from panicking
-  const minWidth = 800; 
+  const width = Math.max(div.clientWidth - 40, 850);
   const renderer = new VF.Renderer(div, VF.Renderer.Backends.SVG);
-  renderer.resize(minWidth, 200);
+  renderer.resize(width, 220);
   const context = renderer.getContext();
-  const measureWidth = (minWidth - 50) / BARS;
+  const measureWidth = (width - 60) / BARS;
 
-  let x = 20;
-  const staves = [];
+  let x = 30;
   phrase.forEach((measure, i) => {
     const stave = new VF.Stave(x, 40, measureWidth);
     if (i === 0) stave.addClef("treble").addTimeSignature("4/4").addKeySignature("Eb");
     stave.setContext(context).draw();
     
-    const vexNotes = measure.map(n => new VF.StaveNote({ clef: "treble", keys: n.keys, duration: n.duration }));
+    const vexNotes = measure.map(n => {
+      const sn = new VF.StaveNote({ clef: "treble", keys: n.keys, duration: n.duration });
+      return sn;
+    });
+
     const beams = VF.Beam.generateBeams(vexNotes);
     Vex.Flow.Formatter.FormatAndDraw(context, stave, vexNotes);
     beams.forEach(b => b.setContext(context).draw());
-    
     x += measureWidth;
-    staves.push(stave);
   });
-
-  // Validation: Check if SVG has actual paths for notes (not just empty staves)
-  const paths = div.querySelectorAll('path').length;
-  return paths > 30; // Heuristic: A full 3-bar melody usually has >30 path elements
 }
 
 let currentPhrase = null;
 async function generateAndVerify() {
   stopPlayback();
-  let success = false;
-  let attempts = 0;
+  const div = document.getElementById("notation");
+  
+  // Logic: Wait for the browser to acknowledge the container's existence
+  currentPhrase = generatePhrase();
+  
+  // Attempt render
+  render(currentPhrase);
 
-  while (!success && attempts < 10) {
-    currentPhrase = generatePhrase();
-    success = tryRender(currentPhrase);
-    attempts++;
+  // If the render looks empty (BBox check), retry once after a tiny delay
+  const svg = div.querySelector('svg');
+  if (!svg || svg.getBBox().width < 100) {
+    setTimeout(() => render(currentPhrase), 50);
   }
 }
 
-/* Audio */
+/* Audio Engine */
 let synth = null;
 async function play() {
   await Tone.start();
   if (synth) synth.dispose();
-  synth = new Tone.PolySynth(Tone.Synth).toDestination();
+  
+  // Flute-like Synth
+  synth = new Tone.MonoSynth({
+    oscillator: { type: "sine" },
+    envelope: { attack: 0.05, release: 0.2 }
+  }).toDestination();
   
   const now = Tone.now();
-  let time = 0;
+  let timeOffset = 0;
+  
   currentPhrase.flat().forEach(n => {
-    synth.triggerAttackRelease(n.rawKey.replace('eb', 'Eb').replace('ab', 'Ab').replace('bb', 'Bb'), n.tone, now + time);
-    time += n.beats * (60 / TEMPO);
+    const freq = Tone.Frequency(n.midi, "midi").toFrequency();
+    synth.triggerAttackRelease(freq, n.tone, now + timeOffset);
+    timeOffset += n.beats * (60 / TEMPO);
   });
 
   document.getElementById("btnPlay").disabled = true;
   document.getElementById("btnStop").disabled = false;
-  setTimeout(stopPlayback, time * 1000 + 500);
+  
+  Tone.Transport.scheduleOnce(() => {
+    stopPlayback();
+  }, `+${timeOffset + 0.5}`);
 }
 
 function stopPlayback() {
-  Tone.Transport.stop();
   if (synth) synth.releaseAll();
   document.getElementById("btnPlay").disabled = false;
   document.getElementById("btnStop").disabled = true;
@@ -195,8 +234,9 @@ document.getElementById("btnGen").onclick = generateAndVerify;
 document.getElementById("btnPlay").onclick = play;
 document.getElementById("btnStop").onclick = stopPlayback;
 
-// Initial Load
-window.onload = generateAndVerify;
+window.onload = () => {
+  setTimeout(generateAndVerify, 100);
+};
 </script>
 </body>
 </html>
